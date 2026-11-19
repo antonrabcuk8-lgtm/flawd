@@ -114,7 +114,8 @@ assertions: [...]
 ```
 
 Catalog of all 12 cards: [`database/README.md`](database/README.md).  
-How to contribute: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+How to contribute: [`CONTRIBUTING.md`](CONTRIBUTING.md).  
+Ingestion quality pipeline (gates, quarantine, trust labels): [`docs/INGESTION_PIPELINE_SPEC.md`](docs/INGESTION_PIPELINE_SPEC.md).
 
 ## License
 
