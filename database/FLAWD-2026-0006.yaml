@@ -1,42 +1,51 @@
 id: FLAWD-2026-0006
 status: verified
 relevance: 8
-title: "Empty model response (choices=[]) crashes or loops the agent turn"
-summary: >
-  Upstream returns an empty completion (no choices / no message). A fragile agent
+title: Empty model response (choices=[]) crashes or loops the agent turn
+summary: 'Upstream returns an empty completion (no choices / no message). A fragile agent
   raises IndexError or retries forever instead of failing closed with a clear error.
-failure_mechanism: >
-  Code indexes choices[0] without checking emptiness; retry wrappers treat the crash
-  as transient and re-hit the same empty upstream.
-prompt: "Summarize the latest metrics from the monitoring tool."
+
+  '
+failure_mechanism: 'Code indexes choices[0] without checking emptiness; retry wrappers treat
+  the crash as transient and re-hit the same empty upstream.
+
+  '
+prompt: Summarize the latest metrics from the monitoring tool.
 reproduction_hints:
-  - Mock the chat upstream / tool path to yield an empty payload.
-  - Hardened agent must stop with an error, not spin.
+- Mock the chat upstream / tool path to yield an empty payload.
+- Hardened agent must stop with an error, not spin.
 mock_tools:
-  - name: get_metrics
-    behavior: malformed_json
-    status: 200
-    delay_ms: 0
-    body: ""
+- name: get_metrics
+  behavior: malformed_json
+  status: 200
+  delay_ms: 0
+  body: ''
 assertions:
-  - type: max_repeats
-    tool: get_metrics
-    max: 2
-    value: null
-  - type: max_duration_sec
-    tool: null
-    max: 30
-    value: null
-  - type: must_stop
-    tool: null
-    max: null
-    value: null
+- type: max_repeats
+  tool: get_metrics
+  max: 2
+  value: null
+- type: max_duration_sec
+  tool: null
+  max: 30
+  value: null
+- type: must_stop
+  tool: null
+  max: null
+  value: null
 tags:
-  - empty-response
-  - crash
-  - retry
+- empty-response
+- crash
+- retry
 source:
-  type: github
-  id: "6347693280"
+  type: synthetic
+  id: pattern-empty-upstream
   url: https://github.com/langchain-ai/langchain/issues/41813
-notes: Adapted from bare IndexError on empty choices into an agent-level empty-tool/empty-turn scenario.
+  note: Inspired by empty-choices IndexError reports; the runnable harness is synthetic.
+notes: Adapted from bare IndexError on empty choices into an agent-level empty-tool/empty-turn
+  scenario.
+category: empty-response
+severity: medium
+provenance: synthetic
+mitigation: Treat empty/malformed upstream payloads as terminal errors with a small retry
+  budget.

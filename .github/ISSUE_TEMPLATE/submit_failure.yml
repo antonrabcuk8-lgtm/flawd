@@ -1,0 +1,82 @@
+name: Submit a failure
+description: Report an AI-agent failure (no YAML required)
+title: "[failure] "
+labels: ["failure-report"]
+body:
+  - type: input
+    id: title_short
+    attributes:
+      label: Short title
+      description: One-line failure name
+      placeholder: Agent recharges card after email SMTP failure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - idempotency
+        - rate-limit
+        - prompt-injection
+        - timeout
+        - malformed-json
+        - missing-tool-call
+        - tool-policy
+        - context-loss
+        - schema-retry
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - critical
+        - high
+        - medium
+        - low
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_broke
+    attributes:
+      label: What broke?
+      description: Technical failure mechanics (loops, bills, injections, bad JSON, etc.)
+    validations:
+      required: true
+
+  - type: input
+    id: source_url
+    attributes:
+      label: Source URL
+      description: Public GitHub issue, blog postmortem, tweet, docs page, etc.
+      placeholder: https://github.com/org/repo/issues/123
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provenance
+    attributes:
+      label: How real is this?
+      options:
+        - Observed in production / public issue (github-inspired candidate)
+        - Synthetic idea / hypothetical combat test
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction hints
+      description: Optional steps, tools involved, expected vs actual behavior
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested mitigation
+      description: What should a correct agent do instead?

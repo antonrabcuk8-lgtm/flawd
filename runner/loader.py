@@ -46,9 +46,10 @@ class Assertion(BaseModel):
 
 
 class SourceInfo(BaseModel):
-    type: str = "unknown"
+    type: str = "unknown"  # github | synthetic | ...
     id: str | int | None = None
     url: str | None = None
+    note: str | None = None
 
 
 class Scenario(BaseModel):
@@ -58,6 +59,10 @@ class Scenario(BaseModel):
     title: str
     summary: str = ""
     failure_mechanism: str = ""
+    category: str = "uncategorized"
+    severity: str = "medium"  # critical | high | medium | low
+    provenance: str = "synthetic"  # github-inspired | synthetic
+    mitigation: str = ""
     prompt: str
     reproduction_hints: list[str] = Field(default_factory=list)
     mock_tools: list[MockTool] = Field(default_factory=list)

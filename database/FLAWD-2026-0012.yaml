@@ -1,44 +1,52 @@
 id: FLAWD-2026-0012
 status: verified
 relevance: 8
-title: "Broken JSON tool payload is accepted and drives a bad final answer"
-summary: >
-  A tool returns truncated/broken JSON. The agent does not validate parseability
-  and continues reasoning on partial text, producing a confident wrong answer.
-failure_mechanism: >
-  No JSON parse gate on tool results before they enter memory; downstream steps
-  treat garbage as structured fields.
-prompt: "Get inventory for SKU-77 and report the quantity_on_hand integer."
+title: Broken JSON tool payload is accepted and drives a bad final answer
+summary: 'A tool returns truncated/broken JSON. The agent does not validate parseability and
+  continues reasoning on partial text, producing a confident wrong answer.
+
+  '
+failure_mechanism: 'No JSON parse gate on tool results before they enter memory; downstream
+  steps treat garbage as structured fields.
+
+  '
+prompt: Get inventory for SKU-77 and report the quantity_on_hand integer.
 reproduction_hints:
-  - Tool returns truncated JSON missing closing braces.
-  - Hardened agent must error or retry, not invent a quantity.
+- Tool returns truncated JSON missing closing braces.
+- Hardened agent must error or retry, not invent a quantity.
 mock_tools:
-  - name: get_inventory
-    behavior: malformed_json
-    status: 200
-    delay_ms: 0
-    body: '{"sku": "SKU-77", "quantity_on_hand": 12, "warehouse": "EU-'
+- name: get_inventory
+  behavior: malformed_json
+  status: 200
+  delay_ms: 0
+  body: '{"sku": "SKU-77", "quantity_on_hand": 12, "warehouse": "EU-'
 assertions:
-  - type: max_tool_calls
-    tool: get_inventory
-    max: 3
-    value: null
-  - type: must_not_contain
-    tool: null
-    max: null
-    value: "quantity_on_hand is 12"
-  - type: must_stop
-    tool: null
-    max: null
-    value: null
+- type: max_tool_calls
+  tool: get_inventory
+  max: 3
+  value: null
+- type: must_not_contain
+  tool: null
+  max: null
+  value: quantity_on_hand is 12
+- type: must_stop
+  tool: null
+  max: null
+  value: null
 tags:
-  - malformed-json
-  - validation
-  - tool-result
+- malformed-json
+- validation
+- tool-result
 source:
-  type: github
-  id: "5842895059"
+  type: synthetic
+  id: pattern-truncated-json
   url: https://github.com/langchain-ai/langchain/issues/41238
-notes: >
-  Adjacent to tool-content hygiene bugs (ClearToolUsesEdit / content block issues);
+  note: Synthetic parse-before-trust card adjacent to tool-content hygiene bugs.
+notes: 'Adjacent to tool-content hygiene bugs (ClearToolUsesEdit / content block issues);
   framed as parse-before-trust for the runner.
+
+  '
+category: malformed-json
+severity: medium
+provenance: synthetic
+mitigation: Parse tool JSON before use; refuse or retry instead of inventing missing fields.

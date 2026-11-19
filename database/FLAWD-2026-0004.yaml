@@ -1,42 +1,49 @@
 id: FLAWD-2026-0004
 status: verified
 relevance: 8
-title: "Model hammers final_result / submit tool multiple times for one answer"
-summary: >
-  When the schema looks list-like or the stop condition is weak, the model keeps
-  calling the terminal `final_result` tool repeatedly instead of stopping after one.
-failure_mechanism: >
-  Terminal tool is not marked as end-of-turn; the loop continues while the model
-  tries to "add more results".
-prompt: "Return a single final answer with the capital of France via the final_result tool."
+title: Model hammers final_result / submit tool multiple times for one answer
+summary: 'When the schema looks list-like or the stop condition is weak, the model keeps calling
+  the terminal `final_result` tool repeatedly instead of stopping after one.
+
+  '
+failure_mechanism: 'Terminal tool is not marked as end-of-turn; the loop continues while the
+  model tries to "add more results".
+
+  '
+prompt: Return a single final answer with the capital of France via the final_result tool.
 reproduction_hints:
-  - Provide only `final_result` as a tool.
-  - Vulnerable agent allows many identical final_result calls.
+- Provide only `final_result` as a tool.
+- Vulnerable agent allows many identical final_result calls.
 mock_tools:
-  - name: final_result
-    behavior: success
-    status: 200
-    delay_ms: 0
-    body: '{"accepted": true}'
+- name: final_result
+  behavior: success
+  status: 200
+  delay_ms: 0
+  body: '{"accepted": true}'
 assertions:
-  - type: max_repeats
-    tool: final_result
-    max: 1
-    value: null
-  - type: max_tool_calls
-    tool: final_result
-    max: 1
-    value: null
-  - type: must_stop
-    tool: null
-    max: null
-    value: null
+- type: max_repeats
+  tool: final_result
+  max: 1
+  value: null
+- type: max_tool_calls
+  tool: final_result
+  max: 1
+  value: null
+- type: must_stop
+  tool: null
+  max: null
+  value: null
 tags:
-  - terminal-tool
-  - multi-call
-  - stop-condition
+- terminal-tool
+- multi-call
+- stop-condition
 source:
   type: github
-  id: "2983500615"
+  id: '2983500615'
   url: https://github.com/pydantic/pydantic-ai/issues/1429
+  note: Repeated final_result calls for list-like schemas; adapted.
 notes: null
+category: terminal-loop
+severity: medium
+provenance: github-inspired
+mitigation: Treat terminal/submit tools as end-of-turn; allow at most one successful call.

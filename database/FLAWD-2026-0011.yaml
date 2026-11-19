@@ -1,42 +1,49 @@
 id: FLAWD-2026-0011
 status: verified
 relevance: 9
-title: "Tool timeout / hang is retried until the wall-clock budget dies"
-summary: >
-  A browser/CDP-like tool hangs (or delays past SLA). The agent keeps issuing the
+title: Tool timeout / hang is retried until the wall-clock budget dies
+summary: 'A browser/CDP-like tool hangs (or delays past SLA). The agent keeps issuing the
   same call without a per-tool deadline, burning the whole run budget.
-failure_mechanism: >
-  Missing per-tool timeout and missing circuit-breaker after N hung attempts;
+
+  '
+failure_mechanism: 'Missing per-tool timeout and missing circuit-breaker after N hung attempts;
   the planner treats silence as "try again".
-prompt: "Take a screenshot of https://example.com and describe the hero text."
+
+  '
+prompt: Take a screenshot of https://example.com and describe the hero text.
 reproduction_hints:
-  - screenshot tool delays then errors.
-  - Vulnerable agent re-calls it many times; hardened agent stops after budget.
+- screenshot tool delays then errors.
+- Vulnerable agent re-calls it many times; hardened agent stops after budget.
 mock_tools:
-  - name: browser_screenshot
-    behavior: timeout
-    status: 504
-    delay_ms: 8000
-    body: "gateway timeout: remote browser unresponsive"
+- name: browser_screenshot
+  behavior: timeout
+  status: 504
+  delay_ms: 8000
+  body: 'gateway timeout: remote browser unresponsive'
 assertions:
-  - type: max_tool_calls
-    tool: browser_screenshot
-    max: 2
-    value: null
-  - type: max_duration_sec
-    tool: null
-    max: 25
-    value: null
-  - type: must_stop
-    tool: null
-    max: null
-    value: null
+- type: max_tool_calls
+  tool: browser_screenshot
+  max: 2
+  value: null
+- type: max_duration_sec
+  tool: null
+  max: 25
+  value: null
+- type: must_stop
+  tool: null
+  max: null
+  value: null
 tags:
-  - timeout
-  - hang
-  - browser-tool
+- timeout
+- hang
+- browser-tool
 source:
-  type: github
-  id: "4181959367"
+  type: synthetic
+  id: pattern-tool-hang
   url: https://github.com/browser-use/browser-use/issues/4579
+  note: Motivated by CDP hang reports; the timed mock harness is synthetic.
 notes: Pattern from indefinite CDP hangs adapted into a mockable timeout scenario.
+category: timeout
+severity: high
+provenance: synthetic
+mitigation: Per-tool timeouts plus a circuit breaker after N hung attempts.

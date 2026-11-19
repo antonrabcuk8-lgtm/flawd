@@ -1,44 +1,52 @@
 id: FLAWD-2026-0008
 status: verified
 relevance: 8
-title: "Tool returns Python repr instead of JSON; agent trusts it as data"
-summary: >
-  A tool serializes a structured object via repr/str. The agent later treats that
+title: Tool returns Python repr instead of JSON; agent trusts it as data
+summary: 'A tool serializes a structured object via repr/str. The agent later treats that
   string as authoritative data and hallucinates fields or fails downstream parsing.
-failure_mechanism: >
-  ToolMessage.content gets a non-JSON Python repr; no content-type / schema check
-  before the next reasoning step.
-prompt: "Fetch the order object for ORD-55 and tell me the total_cents field."
+
+  '
+failure_mechanism: 'ToolMessage.content gets a non-JSON Python repr; no content-type / schema
+  check before the next reasoning step.
+
+  '
+prompt: Fetch the order object for ORD-55 and tell me the total_cents field.
 reproduction_hints:
-  - Mock tool returns a repr-like string instead of JSON.
-  - Hardened agent should refuse or re-ask rather than invent total_cents.
+- Mock tool returns a repr-like string instead of JSON.
+- Hardened agent should refuse or re-ask rather than invent total_cents.
 mock_tools:
-  - name: get_order
-    behavior: malformed_json
-    status: 200
-    delay_ms: 0
-    body: "Order(id='ORD-55', total_cents=1200, status='paid')"
+- name: get_order
+  behavior: malformed_json
+  status: 200
+  delay_ms: 0
+  body: Order(id='ORD-55', total_cents=1200, status='paid')
 assertions:
-  - type: must_not_contain
-    tool: null
-    max: null
-    value: "total_cents=1200"
-  - type: max_tool_calls
-    tool: get_order
-    max: 3
-    value: null
-  - type: must_stop
-    tool: null
-    max: null
-    value: null
+- type: must_not_contain
+  tool: null
+  max: null
+  value: total_cents=1200
+- type: max_tool_calls
+  tool: get_order
+  max: 3
+  value: null
+- type: must_stop
+  tool: null
+  max: null
+  value: null
 tags:
-  - malformed-tool-result
-  - serialization
-  - hallucination
+- malformed-tool-result
+- serialization
+- hallucination
 source:
   type: github
-  id: "6280022826"
+  id: '6280022826'
   url: https://github.com/langchain-ai/langchain/issues/41761
-notes: >
-  must_not_contain is a weak proxy — runner should prefer structured parse-success
-  checks once available; for v1 we flag blind trust of repr text.
+  note: Tool returning Python repr instead of JSON; adapted.
+notes: 'must_not_contain is a weak proxy — runner should prefer structured parse-success checks
+  once available; for v1 we flag blind trust of repr text.
+
+  '
+category: malformed-result
+severity: medium
+provenance: github-inspired
+mitigation: Validate tool payloads (JSON/schema) before trusting fields in the next step.
