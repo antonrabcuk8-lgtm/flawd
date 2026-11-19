@@ -1,0 +1,76 @@
+name: Flawd Agent Reliability CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  crash-test-agents:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start vulnerable agent
+        run: |
+          uvicorn examples.vulnerable_agent:app --host 127.0.0.1 --port 8000 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/health && exit 0
+            sleep 1
+          done
+          echo "vulnerable agent failed to become healthy" >&2
+          exit 1
+
+      - name: Verify Vulnerable Agent catches failures (expecting 0/12)
+        run: |
+          # Runner exits 1 when scenarios fail — that is the expected outcome here.
+          if python -m runner.cli \
+            --target http://127.0.0.1:8000/v1/chat/completions \
+            --fast \
+            --report vulnerable_report.md \
+            --format markdown; then
+            echo "Vulnerable agent unexpectedly passed all scenarios" >&2
+            exit 1
+          fi
+          echo "Vulnerable agent failed as expected (caught by Flawd)"
+
+      - name: Start hardened agent
+        run: |
+          uvicorn examples.hardened_agent:app --host 127.0.0.1 --port 8001 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8001/health && exit 0
+            sleep 1
+          done
+          echo "hardened agent failed to become healthy" >&2
+          exit 1
+
+      - name: Verify Hardened Agent passes all scenarios (expecting 12/12)
+        run: |
+          python -m runner.cli \
+            --target http://127.0.0.1:8001/v1/chat/completions \
+            --fast \
+            --report hardened_report.md \
+            --format markdown
+
+      - name: Upload Crash-Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flawd-reports
+          path: |
+            vulnerable_report.md
+            hardened_report.md
+          if-no-files-found: warn

@@ -11,6 +11,8 @@ state.db-*
 # Crash-test reports (regenerated locally / in CI)
 report.json
 report.md
+*_report.md
+*_report.json
 reports/
 
 # Python

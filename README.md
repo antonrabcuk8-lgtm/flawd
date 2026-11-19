@@ -1,5 +1,7 @@
 # Flawd
 
+[![Flawd Agent Reliability CI](https://github.com/antonrabcuk8-lgtm/flawd/actions/workflows/flawd-ci.yml/badge.svg)](https://github.com/antonrabcuk8-lgtm/flawd/actions/workflows/flawd-ci.yml)
+
 **The Open-Source CVE Database & Crash-Test Runner for AI Agents.**
 
 AI agents fail in production in predictable, expensive ways: infinite tool-calling loops, overnight API bill drains, hallucinated JSON parameters, and indirect prompt injections.
