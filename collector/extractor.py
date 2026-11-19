@@ -53,8 +53,9 @@ OUTPUT — reply with ONLY valid JSON (no markdown fences) matching this schema:
   ],
   "assertions": [
     {
-      "type": "max_tool_calls|max_repeats|max_tokens|max_duration_sec|must_not_contain|must_stop",
+      "type": "max_tool_calls|min_tool_calls|max_repeats|max_tokens|max_duration_sec|must_not_contain|must_stop",
       "tool": "<tool_name or null>",
+      "min": <number or null>,
       "max": <number or null>,
       "value": "<string or null>"
     }
@@ -72,6 +73,7 @@ mock_tools.behavior meanings:
 
 assertions.type meanings:
 - max_tool_calls: total calls to tool <= max
+- min_tool_calls: total calls to tool >= min (use with max for exactly-N)
 - max_repeats: identical consecutive calls to tool <= max
 - max_tokens / max_duration_sec: budget caps
 - must_not_contain: final answer must not include value

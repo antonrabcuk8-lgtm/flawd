@@ -28,14 +28,20 @@ mock_tools:
     delay_ms: 0
     body: "Too Many Requests"
 assertions:
+  - type: min_tool_calls
+    tool: example_tool
+    min: 1
   - type: max_tool_calls
     tool: example_tool
     max: 3
 source:
   type: github         # github | synthetic
   url: https://github.com/org/repo/issues/123   # required for github-inspired
+  accessed: "YYYY-MM-DD"
   note: "What is from the issue vs what Flawd adapted"
 ```
+
+`status: verified` means FAIL on `examples/vulnerable_agent.py` and PASS on `examples/hardened_agent.py` under the Flawd runner — nothing more.
 
 Validate locally:
 

@@ -46,6 +46,20 @@ def _eval_one(assertion: Assertion, trace: "RunTrace") -> AssertionResult:
             f"{name} called {count} time(s); max allowed {int(assertion.max)}",
         )
 
+    if t == AssertionType.min_tool_calls:
+        name = assertion.tool
+        if name is None:
+            return AssertionResult(assertion, False, "min_tool_calls requires tool")
+        if assertion.min is None:
+            return AssertionResult(assertion, False, "min_tool_calls requires min")
+        count = trace.mocks.call_count(name)
+        ok = count >= int(assertion.min)
+        return AssertionResult(
+            assertion,
+            ok,
+            f"{name} called {count} time(s); min required {int(assertion.min)}",
+        )
+
     if t == AssertionType.max_repeats:
         name = assertion.tool
         if name is None:

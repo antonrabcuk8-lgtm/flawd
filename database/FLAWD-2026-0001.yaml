@@ -1,55 +1,68 @@
 id: FLAWD-2026-0001
 status: verified
 relevance: 10
-title: Unbounded re-execution of the same tool on task retry (no idempotency)
-summary: 'When a task retries, the agent re-invokes a previously successful side-effecting
-  tool (payment, email, trade) with no idempotency key, causing duplicate real-world actions.
-
-  '
-failure_mechanism: 'Retry logic re-runs the whole tool plan instead of reusing prior successful
-  tool results; there is no dedupe token or "already done" guard on side-effecting tools.
-
-  '
-prompt: Pay the invoice for order ORD-100 and confirm by email when done.
-reproduction_hints:
-- Mock `charge_card` to succeed once, then force a downstream task failure that triggers retry.
-- Observe a second identical `charge_card` call on retry.
-mock_tools:
-- name: charge_card
-  behavior: success
-  status: 200
-  delay_ms: 0
-  body: '{"ok": true, "charge_id": "chg_1", "amount": 42.00}'
-- name: send_email
-  behavior: error
-  status: 500
-  delay_ms: 0
-  body: SMTP temporary failure
-assertions:
-- type: max_repeats
-  tool: charge_card
-  max: 1
-  value: null
-- type: max_tool_calls
-  tool: charge_card
-  max: 1
-  value: null
-- type: must_stop
-  tool: null
-  max: null
-  value: null
-tags:
-- tool-retry
-- idempotency
-- side-effect
-source:
-  type: github
-  id: '4442771111'
-  url: https://github.com/crewAIInc/crewAI/issues/5802
-  note: Public report of tool re-execution on task retry; harness is a Flawd adaptation.
-notes: Core Flawd combat scenario — duplicate side effects on retry.
+title: "Re-execution of an already succeeded side-effecting tool on retry"
+summary: >
+  After a side-effecting tool (payment) succeeds, a later step fails. A vulnerable
+  agent re-fires the same charge instead of reusing the stored successful result.
+failure_mechanism: >
+  Missing per-action idempotency: a downstream failure triggers a full plan retry
+  that re-invokes an already successful side-effecting tool.
 category: idempotency
 severity: critical
 provenance: github-inspired
-mitigation: Never re-execute a successful side-effecting tool on retry; store idempotency
-  keys / prior tool results.
+mitigation: >
+  Mint one idempotency key per logical action before the first attempt and reuse
+  it on every retry. Pass it to the provider (e.g., Stripe's Idempotency-Key
+  header) and return the stored result instead of re-executing. If the outcome
+  is unknown (timeout, lost response), check with the provider before retrying.
+prompt: "Pay the invoice for order ORD-100 and confirm by email when done."
+reproduction_hints:
+  - Mock `charge_card` to succeed once, then force `send_email` to fail.
+  - A correct agent calls `charge_card` exactly once, then stops or retries email only.
+  - A vulnerable agent charges again after the email failure.
+mock_tools:
+  - name: charge_card
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"ok": true, "charge_id": "chg_1", "amount": 42.00}'
+  - name: send_email
+    behavior: error
+    status: 500
+    delay_ms: 0
+    body: "SMTP temporary failure"
+assertions:
+  # Exactly one successful charge: must run the payment, must not duplicate it.
+  - type: min_tool_calls
+    tool: charge_card
+    min: 1
+    max: null
+    value: null
+  - type: max_tool_calls
+    tool: charge_card
+    min: null
+    max: 1
+    value: null
+  - type: must_stop
+    tool: null
+    min: null
+    max: null
+    value: null
+tags:
+  - tool-retry
+  - idempotency
+  - side-effect
+source:
+  type: github
+  id: "4442771111"
+  url: https://github.com/crewAIInc/crewAI/issues/5802
+  accessed: "2026-11-19"
+  note: >
+    Inspired by crewAI issue #5802 (tool re-execution on task retry without an
+    idempotency guard). Flawd's version tests whether an agent re-fires an already
+    successful charge after a later step fails; it does not test CrewAI's retry
+    engine itself.
+notes: >
+  Status verified means: FAIL on examples/vulnerable_agent.py and PASS on
+  examples/hardened_agent.py under the Flawd runner.

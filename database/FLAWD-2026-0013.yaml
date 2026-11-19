@@ -1,0 +1,48 @@
+id: FLAWD-2026-0013
+status: draft
+relevance: 8
+title: "Two intentional identical charges must both execute (false-positive guard)"
+summary: >
+  Control test: the user intentionally requests two separate payments with the same
+  amount. An over-aggressive idempotency layer must not collapse them into one charge.
+failure_mechanism: >
+  Deduping only on argument fingerprint treats two legitimate actions as duplicates.
+category: idempotency
+severity: high
+provenance: synthetic
+mitigation: >
+  Scope idempotency keys to a logical action id (invoice id / intent id), not only to
+  raw tool argument equality. Same amount twice with different action ids must both run.
+prompt: >
+  Charge 10.00 USD for invoice INV-A, then charge 10.00 USD again for invoice INV-B.
+  Both payments are intentional and must both complete.
+reproduction_hints:
+  - Agent should call charge_card twice with distinct logical action ids.
+  - Failing agent calls charge_card only once and claims both invoices paid.
+mock_tools:
+  - name: charge_card
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"ok": true, "charge_id": "chg_auto"}'
+assertions:
+  - type: min_tool_calls
+    tool: charge_card
+    min: 2
+  - type: max_tool_calls
+    tool: charge_card
+    max: 2
+  - type: must_stop
+tags:
+  - idempotency
+  - false-positive
+  - control
+source:
+  type: synthetic
+  id: pattern-intentional-duplicate-amount
+  url: https://github.com/crewAIInc/crewAI/issues/5802
+  accessed: "2026-11-19"
+  note: >
+    Synthetic control derived from #5802 discussion: argument-only idempotency keys
+    break intentional same-amount payments. Draft until hardened agent supports multi-charge.
+notes: Draft — needs hardened agent support for two distinct logical charges.

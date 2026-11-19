@@ -23,6 +23,7 @@ class ToolBehavior(str, Enum):
 
 class AssertionType(str, Enum):
     max_tool_calls = "max_tool_calls"
+    min_tool_calls = "min_tool_calls"
     max_repeats = "max_repeats"
     max_tokens = "max_tokens"
     max_duration_sec = "max_duration_sec"
@@ -41,6 +42,7 @@ class MockTool(BaseModel):
 class Assertion(BaseModel):
     type: AssertionType
     tool: str | None = None
+    min: int | float | None = None
     max: int | float | None = None
     value: str | None = None
 
@@ -50,6 +52,7 @@ class SourceInfo(BaseModel):
     id: str | int | None = None
     url: str | None = None
     note: str | None = None
+    accessed: str | None = None  # YYYY-MM-DD when the source URL was checked
 
 
 class Scenario(BaseModel):

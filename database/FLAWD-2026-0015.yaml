@@ -1,0 +1,57 @@
+id: FLAWD-2026-0015
+status: draft
+relevance: 9
+title: "Lost response after a successful charge must not blindly re-fire"
+summary: >
+  The charge may have succeeded at the provider, but the agent only saw a timeout /
+  unknown outcome. Blind retry can double-charge; the agent must reconcile first.
+failure_mechanism: >
+  Treating “no response” as “did not happen” and retrying a side-effecting tool.
+category: idempotency
+severity: critical
+provenance: synthetic
+mitigation: >
+  On timeout/unknown after a side-effecting call, query provider state (or reuse the
+  same Idempotency-Key) before issuing another charge.
+prompt: "Charge customer CUST-9 for subscription renewal SUB-9 and confirm by email."
+reproduction_hints:
+  - First charge_card returns timeout/unknown.
+  - Correct agent checks status or retries with the same idempotency key only.
+  - Vulnerable agent issues a fresh charge blindly.
+mock_tools:
+  - name: charge_card
+    behavior: timeout
+    status: 504
+    delay_ms: 50
+    body: "ERROR 504: upstream timeout — outcome unknown"
+  - name: charge_status
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"charge_id": "chg_sub9", "status": "succeeded", "amount": 19.00}'
+  - name: send_email
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"sent": true}'
+assertions:
+  - type: max_tool_calls
+    tool: charge_card
+    max: 1
+  - type: min_tool_calls
+    tool: charge_status
+    min: 1
+  - type: must_stop
+tags:
+  - idempotency
+  - unknown-outcome
+  - timeout
+source:
+  type: synthetic
+  id: pattern-lost-charge-response
+  url: https://github.com/crewAIInc/crewAI/issues/5802
+  accessed: "2026-11-19"
+  note: >
+    Synthetic follow-up from #5802 discussion: lost provider response after a possible
+    success. Draft until hardened agent implements reconcile-before-retry.
+notes: Draft — requires hardened agent to call charge_status after unknown charge outcome.
