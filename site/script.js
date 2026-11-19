@@ -22,34 +22,58 @@
     return card.category === filter;
   };
 
-  const setupCopyButtons = () => {
-    document.querySelectorAll("[data-copy]").forEach((btn) => {
-      const reset = () => {
-        btn.textContent = "Copy";
-        btn.classList.remove("copied");
-      };
+  const packLabel = (pack) => {
+    if (pack === "pack-15") return "3-run pack ($15)";
+    if (pack === "b2b-audit") return "B2B audit call";
+    return "Single run ($9)";
+  };
+
+  const setupNav = () => {
+    const btn = document.getElementById("menuBtn");
+    const links = document.getElementById("navlinks");
+    if (!btn || !links) return;
+    btn.addEventListener("click", () => links.classList.toggle("open"));
+    links.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => links.classList.remove("open"))
+    );
+  };
+
+  const setupCopy = () => {
+    document.querySelectorAll(".copy").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const text = (btn.getAttribute("data-copy") || "").replace(/&#10;/g, "\n");
+        const text = btn.getAttribute("data-copy") || "";
         try {
           await navigator.clipboard.writeText(text);
-          btn.textContent = "Copied";
+          btn.textContent = "COPIED";
           btn.classList.add("copied");
-          window.setTimeout(reset, 1600);
+          window.setTimeout(() => {
+            btn.textContent = "COPY";
+            btn.classList.remove("copied");
+          }, 1400);
         } catch {
-          btn.textContent = "Select + copy";
-          window.setTimeout(reset, 1600);
+          btn.textContent = "SELECT TEXT";
         }
       });
     });
   };
 
+  const setupPlans = () => {
+    document.querySelectorAll(".plan").forEach((label) => {
+      label.addEventListener("click", () => {
+        document.querySelectorAll(".plan").forEach((p) => p.classList.remove("selected"));
+        label.classList.add("selected");
+        const input = label.querySelector("input");
+        if (input) input.checked = true;
+      });
+    });
+  };
+
   const renderCatalog = (cards) => {
-    const grid = document.getElementById("catalog-grid");
-    const tpl = document.getElementById("card-template");
-    const meta = document.getElementById("filter-meta");
+    const grid = document.getElementById("cards");
+    const meta = document.getElementById("catalogMeta");
     const countEl = document.getElementById("card-count");
-    const foot = document.getElementById("catalog-foot");
-    if (!grid || !tpl) return;
+    const foot = document.getElementById("catalogFoot");
+    if (!grid) return;
 
     if (countEl) countEl.textContent = String(cards.length);
     if (foot) {
@@ -60,60 +84,56 @@
     const updated = document.getElementById("updated-date");
     if (updated && cfg.catalogUpdated) updated.textContent = cfg.catalogUpdated;
 
-    grid.replaceChildren();
-    cards.forEach((card) => {
-      const node = tpl.content.firstElementChild.cloneNode(true);
-      node.href = `./catalog/${card.id}.html`;
-      node.querySelector(".card-id").textContent = card.id.replace("FLAWD-2026-", "");
-      const sev = node.querySelector(".card-sev");
-      sev.textContent = card.severity;
-      sev.classList.add(card.severity);
-      node.querySelector(".card-title").textContent = card.title;
-      node.querySelector(".card-summary").textContent = card.summary;
-      node.querySelector(".card-cat").textContent = card.category;
-      const prov = provenanceLabel(card.provenance);
-      const provEl = node.querySelector(".card-prov");
-      provEl.textContent = prov.text;
-      provEl.classList.add(prov.cls);
-      grid.appendChild(node);
-    });
-
-    const apply = (filter) => {
-      let shown = 0;
-      grid.querySelectorAll(".card-item").forEach((el, idx) => {
-        const ok = matchesFilter(cards[idx], filter);
-        el.classList.toggle("is-hidden", !ok);
-        if (ok) shown += 1;
-      });
+    const paint = (filter) => {
+      const visible = cards.filter((c) => matchesFilter(c, filter));
+      grid.innerHTML = visible
+        .map((card) => {
+          const prov = provenanceLabel(card.provenance);
+          const short = card.id.replace("FLAWD-2026-", "");
+          return `<a class="failure" href="./catalog/${card.id}.html">
+            <div class="failure-top">
+              <span class="id">FLAWD-2026-${short}</span>
+              <span class="severity ${card.severity}">${card.severity}</span>
+            </div>
+            <h4>${escapeHtml(card.title)}</h4>
+            <p>${escapeHtml(card.summary)}</p>
+            <div class="tagrow">
+              <span>${escapeHtml(card.category)}</span>
+              <span class="${prov.cls}">${prov.text}</span>
+            </div>
+          </a>`;
+        })
+        .join("");
       if (meta) {
         meta.textContent =
           filter === "all"
-            ? `Showing all ${shown} verified cards`
-            : `Showing ${shown} of ${cards.length} · filter: ${filter}`;
+            ? `Showing all ${visible.length} verified cards`
+            : `Showing ${visible.length} of ${cards.length} verified cards`;
       }
     };
 
-    document.querySelectorAll(".chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-        chip.classList.add("active");
-        apply(chip.dataset.filter || "all");
+    document.querySelectorAll(".filter").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        paint(btn.dataset.filter || "all");
       });
     });
 
-    apply("all");
+    paint("all");
   };
 
-  const packLabel = (pack) => {
-    if (pack === "pack-15") return "3-run pack ($15)";
-    if (pack === "b2b-audit") return "B2B audit call";
-    return "Single run ($9)";
-  };
+  const escapeHtml = (s) =>
+    String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
 
-  const setupOrderForm = () => {
-    const form = document.getElementById("order-form");
-    const status = document.getElementById("form-status");
-    const hint = document.getElementById("form-hint");
+  const setupForm = () => {
+    const form = document.getElementById("auditForm");
+    const status = document.getElementById("formMessage");
+    const hint = document.getElementById("formHint");
     if (!form) return;
 
     if (hint) {
@@ -121,9 +141,6 @@
         hint.textContent = "Submits privately via Formspree. Nothing is posted to GitHub.";
       } else if (cfg.contactEmail) {
         hint.textContent = `Opens a private email draft to ${cfg.contactEmail}. Nothing is posted to GitHub.`;
-      } else {
-        hint.textContent =
-          "Set formEndpoint (Formspree) or contactEmail in site/config.js. Until then, the form copies a private request and opens a blank mailto draft — still never a public issue.";
       }
     }
 
@@ -146,9 +163,9 @@
         if (!status) return;
         status.hidden = false;
         status.textContent = msg;
+        status.style.display = "block";
       };
 
-      // Preferred: Formspree / compatible POST endpoint (private inbox).
       if (cfg.formEndpoint) {
         try {
           const res = await fetch(cfg.formEndpoint, {
@@ -161,6 +178,9 @@
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           form.reset();
+          document.querySelectorAll(".plan").forEach((p, i) => {
+            p.classList.toggle("selected", i === 0);
+          });
           show("Sent privately. We’ll reply by email — no public issue created.");
           return;
         } catch (err) {
@@ -184,20 +204,21 @@
       }
 
       const to = cfg.contactEmail || "";
-      const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(
+      window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(
         `[Flawd Cloud] ${packLabel(pack)}`
       )}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailto;
       show(
         to
           ? "Private email draft opened. Request also copied to clipboard."
-          : "Mailto draft opened (add contactEmail in config.js). Request copied to clipboard — do not paste into a public issue."
+          : "Mailto draft opened (set contactEmail in config.js). Copied to clipboard — do not paste into a public issue."
       );
     });
   };
 
-  setupCopyButtons();
-  setupOrderForm();
+  setupNav();
+  setupCopy();
+  setupPlans();
+  setupForm();
 
   fetch("./catalog.json")
     .then((r) => {
@@ -210,7 +231,7 @@
       renderCatalog(data.cards || []);
     })
     .catch(() => {
-      const meta = document.getElementById("filter-meta");
+      const meta = document.getElementById("catalogMeta");
       if (meta) meta.textContent = "Catalog failed to load.";
     });
 })();

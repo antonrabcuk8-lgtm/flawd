@@ -14,19 +14,6 @@ DB = ROOT / "database"
 SITE = ROOT / "site"
 CATALOG_DIR = SITE / "catalog"
 
-NAV = """
-    <header class="top">
-      <a class="mark" href="../">Flaw<span class="crack">a</span>d</a>
-      <nav>
-        <a href="../#install">Install</a>
-        <a href="../#catalog">Catalog</a>
-        <a href="../#cloud">Cloud</a>
-        <a href="https://github.com/antonrabcuk8-lgtm/flawd/issues/new?template=submit_failure.yml">Submit a failure</a>
-        <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
-      </nav>
-    </header>
-"""
-
 
 def esc(s: str | None) -> str:
     return html.escape(s or "", quote=True)
@@ -71,10 +58,15 @@ def load_cards() -> list[dict]:
 
 def render_card_page(card: dict) -> str:
     prov_label, prov_class = provenance_label(card["provenance"])
-    hints = "".join(f"<li>{esc(h)}</li>" for h in card["reproduction_hints"]) or "<li>See prompt and assertions in the YAML.</li>"
+    hints = "".join(f"<li>{esc(h)}</li>" for h in card["reproduction_hints"]) or (
+        "<li>See prompt and assertions in the YAML.</li>"
+    )
     source_block = ""
     if card.get("source_url"):
-        source_block = f'<p><a href="{esc(card["source_url"])}" rel="noopener">Source link</a>'
+        source_block = (
+            f'<p><a class="lime" href="{esc(card["source_url"])}" rel="noopener">'
+            f"Source link</a>"
+        )
         if card.get("source_accessed"):
             source_block += f' · accessed {esc(str(card["source_accessed"]))}'
         source_block += "</p>"
@@ -86,59 +78,80 @@ def render_card_page(card: dict) -> str:
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090d0b" />
     <title>{esc(card["id"])} — {esc(card["title"])} · Flawd</title>
     <meta name="description" content="{esc(card["summary"][:180])}" />
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../styles.css" />
   </head>
   <body class="page-card">
-    <div class="noise" aria-hidden="true"></div>
-{NAV}
-    <main class="card-page">
-      <p class="crumb"><a href="../#catalog">Catalog</a> / {esc(card["id"])}</p>
-      <div class="card-meta-row">
-        <span class="pill sev-{esc(card["severity"])}">{esc(card["severity"])}</span>
-        <span class="pill">{esc(card["category"])}</span>
-        <span class="pill {prov_class}">{esc(prov_label)}</span>
-        <span class="mark-fail" title="Fails unprotected agents">FAIL</span>
-        <span class="mark-pass" title="Passes hardened reference">PASS*</span>
-      </div>
-      <h1>{esc(card["id"])}</h1>
-      <p class="card-page-title">{esc(card["title"])}</p>
-      <p class="lede-solid">{esc(card["summary"])}</p>
+    <div class="wrap">
+      <nav>
+        <a class="brand" href="../">Flaw<span>d</span></a>
+        <div class="navlinks" id="navlinks">
+          <a href="../#quickstart">Install</a>
+          <a href="../#catalog">Catalog</a>
+          <a href="../#audit">Cloud</a>
+          <a href="https://github.com/antonrabcuk8-lgtm/flawd/issues/new?template=submit_failure.yml">Submit a failure</a>
+          <a class="nav-cta" href="../#audit">Get audited ↗</a>
+        </div>
+        <button class="menu" id="menuBtn" type="button" aria-label="Toggle menu">MENU</button>
+      </nav>
 
-      <section>
-        <h2>Failure mechanism</h2>
-        <p>{esc(card["failure_mechanism"])}</p>
-      </section>
+      <main class="card-page">
+        <p class="crumb"><a href="../#catalog">Catalog</a> / {esc(card["id"])}</p>
+        <div class="card-meta-row">
+          <span class="pill sev-{esc(card["severity"])}">{esc(card["severity"])}</span>
+          <span class="pill">{esc(card["category"])}</span>
+          <span class="pill {prov_class}">{esc(prov_label)}</span>
+          <span class="mark-fail">FAIL</span>
+          <span class="mark-pass">PASS*</span>
+        </div>
+        <h1>{esc(card["id"])}</h1>
+        <p class="card-page-title">{esc(card["title"])}</p>
+        <p class="lede-solid">{esc(card["summary"])}</p>
 
-      <section>
-        <h2>Reproduction</h2>
-        <p class="muted">Prompt sent to the agent:</p>
-        <pre class="prompt-block">{esc(card["prompt"])}</pre>
-        <ol class="steps">{hints}</ol>
-      </section>
+        <section>
+          <h2>Failure mechanism</h2>
+          <p>{esc(card["failure_mechanism"])}</p>
+        </section>
 
-      <section>
-        <h2>Mitigation</h2>
-        <p>{esc(card["mitigation"])}</p>
-      </section>
+        <section>
+          <h2>Reproduction</h2>
+          <p class="muted">Prompt sent to the agent:</p>
+          <pre class="prompt-block">{esc(card["prompt"])}</pre>
+          <ol class="steps">{hints}</ol>
+        </section>
 
-      <section>
-        <h2>Provenance</h2>
-        <p><strong>{esc(prov_label)}</strong> · field <code>provenance: {esc(card["provenance"])}</code></p>
-        {source_block}
-        <p class="tiny">* PASS on <code>examples/hardened_agent.py</code> — a reference agent written for this repo, not a third-party product.</p>
-      </section>
+        <section>
+          <h2>Mitigation</h2>
+          <p>{esc(card["mitigation"])}</p>
+        </section>
 
-      <p class="back"><a href="../#catalog">← All 28 cards</a> · <a href="https://github.com/antonrabcuk8-lgtm/flawd/blob/master/database/{esc(card["id"])}.yaml">YAML on GitHub</a></p>
-    </main>
-    <footer>
-      <p>MIT · Catalog by <a href="https://github.com/antonrabcuk8-lgtm">antonrabcuk8-lgtm</a> · Updated 2026-11-19</p>
-    </footer>
+        <section>
+          <h2>Provenance</h2>
+          <p><strong>{esc(prov_label)}</strong> · field <code>provenance: {esc(card["provenance"])}</code></p>
+          {source_block}
+          <p class="tiny">* PASS on <code>examples/hardened_agent.py</code> — a reference agent written for this repo, not a third-party product.</p>
+        </section>
+
+        <p class="back"><a href="../#catalog">← All 28 cards</a> · <a href="https://github.com/antonrabcuk8-lgtm/flawd/blob/master/database/{esc(card["id"])}.yaml">YAML on GitHub</a></p>
+      </main>
+
+      <footer>
+        <div class="footer-inner">
+          <span>MIT · Catalog by <a class="lime" href="https://github.com/antonrabcuk8-lgtm">antonrabcuk8-lgtm</a> · Updated 2026-11-19</span>
+          <span>BUILT FOR SAFER AGENTS.</span>
+        </div>
+      </footer>
+    </div>
+    <script>
+      document.getElementById('menuBtn')?.addEventListener('click', () =>
+        document.getElementById('navlinks')?.classList.toggle('open'));
+    </script>
   </body>
 </html>
 """
@@ -150,8 +163,7 @@ def main() -> None:
     for old in CATALOG_DIR.glob("FLAWD-*.html"):
         old.unlink()
     for card in cards:
-        out = CATALOG_DIR / f"{card['id']}.html"
-        out.write_text(render_card_page(card), encoding="utf-8")
+        (CATALOG_DIR / f"{card['id']}.html").write_text(render_card_page(card), encoding="utf-8")
 
     payload = {
         "generated": "2026-11-19",
