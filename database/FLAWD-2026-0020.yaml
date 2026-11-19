@@ -1,0 +1,38 @@
+id: FLAWD-2026-0020
+status: verified
+relevance: 8
+title: Reconnect storm after agent close drops the live tool session
+summary: Closing/keeping-alive a session drops the socket; the agent reconnect-loops instead of stopping.
+failure_mechanism: No circuit breaker on repeated session/websocket drop errors.
+category: timeout
+severity: high
+provenance: github-inspired
+mitigation: Treat session-drop errors as terminal for the current run; do not spin reconnect attempts
+  without a budget.
+prompt: Open a browser session, fetch the title of https://example.com, then stop cleanly.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: browser_navigate
+  behavior: timeout
+  status: 504
+  delay_ms: 50
+  body: 'ERROR 504: websocket dropped after close; reconnecting...'
+assertions:
+- type: max_tool_calls
+  tool: browser_navigate
+  max: 2
+- type: max_duration_sec
+  max: 25
+- type: must_stop
+tags:
+- websocket
+- reconnect
+source:
+  type: github
+  id: derived-4374
+  url: https://github.com/browser-use/browser-use/issues/4374
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

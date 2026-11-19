@@ -1,0 +1,36 @@
+id: FLAWD-2026-0019
+status: verified
+relevance: 8
+title: Summarization middleware splits a tool call from its result (pairing break)
+summary: History compaction separates a tool call from its result and later turns fail with pairing errors.
+failure_mechanism: Middleware truncates nested tool blocks without keeping caller/result linkage.
+category: tool-policy
+severity: high
+provenance: github-inspired
+mitigation: Compaction/summarization must preserve tool-call/result pairing invariants or refuse to compact
+  mid-pair.
+prompt: Run code_execution to compute 2+2, then explain the result.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: code_execution
+  behavior: error
+  status: 400
+  delay_ms: 0
+  body: 'ERROR 400: source tool not found after history compaction'
+assertions:
+- type: max_tool_calls
+  tool: code_execution
+  max: 3
+- type: must_stop
+tags:
+- summarization
+- tool-pairing
+source:
+  type: github
+  id: '6429177744'
+  url: https://github.com/langchain-ai/langchain/issues/41898
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

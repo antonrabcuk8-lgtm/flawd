@@ -1,0 +1,36 @@
+id: FLAWD-2026-0027
+status: verified
+relevance: 8
+title: Nested server-tool result missing after compaction triggers retry storm
+summary: A non-retryable structural tool error is retried as if transient.
+failure_mechanism: Error taxonomy missing; all tool errors share the same retry policy.
+category: schema-retry
+severity: medium
+provenance: synthetic
+mitigation: Classify non-retryable structural errors and stop; do not burn retries on immutable history
+  defects.
+prompt: Use research_tool to gather facts, then write a short brief.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: research_tool
+  behavior: error
+  status: 409
+  delay_ms: 0
+  body: 'ERROR 409: nested tool result missing after compaction; retrying will not help'
+assertions:
+- type: max_repeats
+  tool: research_tool
+  max: 2
+- type: must_stop
+tags:
+- retry
+- taxonomy
+source:
+  type: synthetic
+  id: pattern-nested-tool-missing
+  url: null
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

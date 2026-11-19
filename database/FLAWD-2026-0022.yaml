@@ -1,0 +1,36 @@
+id: FLAWD-2026-0022
+status: verified
+relevance: 8
+title: Invalid tool timeout/retry config is accepted and causes hang-like behavior
+summary: A toolset accepts timeout<=0 or negative retries, then the run hangs or retry-storms.
+failure_mechanism: Missing config validation for tool timeout/retry parameters.
+category: timeout
+severity: medium
+provenance: github-inspired
+mitigation: Validate timeout and max_retries at configuration time; reject non-positive budgets before
+  the run starts.
+prompt: Call slow_lookup for key=alpha.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: slow_lookup
+  behavior: timeout
+  status: 504
+  delay_ms: 50
+  body: 'ERROR 504: tool timeout budget was non-positive / disabled'
+assertions:
+- type: max_tool_calls
+  tool: slow_lookup
+  max: 2
+- type: must_stop
+tags:
+- config
+- timeout
+source:
+  type: github
+  id: '5591059742'
+  url: https://github.com/pydantic/pydantic-ai/issues/8815
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

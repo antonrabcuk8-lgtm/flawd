@@ -6,6 +6,8 @@
 # Local collector state (raw issue bodies / dedup DB)
 state.db
 state.db-*
+pipeline.db
+pipeline.db-*
 *.db-journal
 
 # Crash-test reports (regenerated locally / in CI)

@@ -1,0 +1,43 @@
+id: FLAWD-2026-0024
+status: verified
+relevance: 8
+title: Streaming path drops context vars needed for later tool authorization
+summary: Auth context set before streaming is lost, so later tool calls run unauthorized/fail unexpectedly.
+failure_mechanism: Streaming response adapter does not propagate context variables into tool execution.
+category: context-loss
+severity: high
+provenance: github-inspired
+mitigation: Preserve contextvars across streaming adapters; fail closed if auth context is missing.
+prompt: Authorize as tenant TEN-1, then list invoices for that tenant.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: authorize_tenant
+  behavior: success
+  status: 200
+  delay_ms: 0
+  body: '{"tenant": "TEN-1", "token": "t-ok"}'
+- name: list_invoices
+  behavior: error
+  status: 401
+  delay_ms: 0
+  body: 'ERROR 401: missing tenant context var in streaming path'
+assertions:
+- type: min_tool_calls
+  tool: authorize_tenant
+  min: 1
+- type: max_tool_calls
+  tool: list_invoices
+  max: 2
+- type: must_stop
+tags:
+- streaming
+- contextvars
+source:
+  type: github
+  id: '3915834233'
+  url: https://github.com/pydantic/pydantic-ai/issues/4264
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

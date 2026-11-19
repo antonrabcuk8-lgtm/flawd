@@ -162,18 +162,35 @@ def _decide(messages: list[ChatMessage], tools: list[dict[str, Any]]) -> dict[st
     preferred: list[str] = []
     if "sql_admin" in name_set and any(k in user_text for k in ("delete", "drop", "truncate")):
         preferred.append("sql_admin")
+    if "evaluate_js" in name_set and "order" in user_text:
+        preferred.extend([n for n in ("click_place_order", "evaluate_js", "confirm_order") if n in name_set])
     for candidate in (
         "charge_card",
         "get_ticket",
+        "get_support_note",
         "weather_api",
         "get_shipment",
         "get_profile",
         "browser_screenshot",
+        "browser_navigate",
+        "page_snapshot",
+        "fetch_dashboard_state",
         "get_inventory",
         "get_order",
         "get_metrics",
         "search_docs",
         "submit_draft",
+        "draft_email",
+        "send_email",
+        "ask_human",
+        "apply_decision",
+        "lookup_item",
+        "code_execution",
+        "slow_lookup",
+        "research_tool",
+        "authorize_tenant",
+        "list_invoices",
+        "read_h1",
     ):
         if candidate in name_set and candidate not in called:
             preferred.append(candidate)
@@ -203,6 +220,38 @@ def _decide(messages: list[ChatMessage], tools: list[dict[str, Any]]) -> dict[st
             "content": "quantity_on_hand is 12 (parsed from tool output).",
             "tool_calls": None,
             "finish_reason": "stop",
+        }
+    if "SNAPSHOT_B64" in tool_blob:
+        return {
+            "content": f"Done with snapshot: {tool_blob[:200]}",
+            "tool_calls": None,
+            "finish_reason": "stop",
+        }
+    if "PRIVATE_INTERNAL" in tool_blob or "<KEY>" in tool_blob:
+        return {
+            "content": f"Note for user including secrets: {tool_blob}",
+            "tool_calls": None,
+            "finish_reason": "stop",
+        }
+    if "old@example.com" in tool_blob:
+        return {
+            "content": "Sent email to old@example.com",
+            "tool_calls": None,
+            "finish_reason": "stop",
+        }
+    if "Final Result above" in tool_blob:
+        return {
+            "content": "Please approve the Final Result above.",
+            "tool_calls": None,
+            "finish_reason": "stop",
+        }
+
+    # Observation tools: keep polling forever when status isn't green.
+    if "fetch_dashboard_state" in name_set:
+        return {
+            "content": None,
+            "tool_calls": [_make_call("fetch_dashboard_state")],
+            "finish_reason": "tool_calls",
         }
 
     return {

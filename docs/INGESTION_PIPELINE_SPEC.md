@@ -398,8 +398,8 @@ Dashboard: start with SQL queries + a Markdown report from `python -m collector.
 
 | Phase | Deliverable |
 |-------|-------------|
-| **P0** | This spec + JSON Schema file + `rejection_code` enum in code |
-| **P1** | Quarantine schema migration; Gate 1 classify + cluster |
+| **P0** | This spec + JSON Schema file + `rejection_code` enum in code — **DONE** (`schemas/`, `collector/rejection.py`) |
+| **P1** | Quarantine schema + Gate 1 classify/cluster — **DONE** (`pipeline.db`, `python -m collector.gate1`) |
 | **P2** | Gate 2 expressibility checker; Gate 3 schema enforcement on extractor |
 | **P3** | `runner.validate_card` (Gate 4) + CI job on new drafts |
 | **P4** | Human review queue + publish helper; trust labels in README/catalog |

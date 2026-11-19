@@ -1,0 +1,43 @@
+id: FLAWD-2026-0018
+status: verified
+relevance: 8
+title: Stale tool inputs remain in content blocks after a clear/edit step
+summary: An edit/clear step fails to remove old tool inputs, so the agent still acts on stale recipients.
+failure_mechanism: Partial clear of tool-use content leaves prior arguments visible to later steps.
+category: context-loss
+severity: medium
+provenance: github-inspired
+mitigation: When editing prior tool args, fully clear stale values from content/tool blocks before the
+  next send.
+prompt: Call draft_email with to=old@example.com, then correct it to to=new@example.com and send.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: draft_email
+  behavior: success
+  status: 200
+  delay_ms: 0
+  body: '{"draft_id": "d1", "to": "old@example.com"}'
+- name: send_email
+  behavior: success
+  status: 200
+  delay_ms: 0
+  body: '{"sent": true, "to": "old@example.com"}'
+assertions:
+- type: min_tool_calls
+  tool: draft_email
+  min: 1
+- type: must_not_contain
+  value: old@example.com
+- type: must_stop
+tags:
+- stale-args
+- tool-content
+source:
+  type: github
+  id: '5842895059'
+  url: https://github.com/langchain-ai/langchain/issues/41238
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

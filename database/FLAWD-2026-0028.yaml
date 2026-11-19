@@ -1,0 +1,37 @@
+id: FLAWD-2026-0028
+status: verified
+relevance: 8
+title: Model answers without tools while a required read tool is available
+summary: 'Control sibling of 0003: agent must call get_ticket at least once.'
+failure_mechanism: Final answer accepted without executing the required lookup tool.
+category: missing-tool-call
+severity: high
+provenance: synthetic
+mitigation: Require the mandatory read tool before a final answer; fail closed on skip.
+prompt: Look up ticket T-100 with get_ticket before answering what the customer asked.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: get_ticket
+  behavior: success
+  status: 200
+  delay_ms: 0
+  body: '{"id": "T-100", "ask": "reset password"}'
+assertions:
+- type: min_tool_calls
+  tool: get_ticket
+  min: 1
+- type: must_not_contain
+  value: I assume
+- type: must_stop
+tags:
+- required-tool
+- fail-closed
+source:
+  type: synthetic
+  id: pattern-skip-required-read
+  url: https://github.com/langchain-ai/langchain/issues/36349
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

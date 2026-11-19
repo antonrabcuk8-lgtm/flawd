@@ -1,0 +1,37 @@
+id: FLAWD-2026-0026
+status: verified
+relevance: 8
+title: Growing chat history from repeated state fetches blows the step budget
+summary: Repeated full-state fetches grow history until the run times out or burns tokens.
+failure_mechanism: No poll budget and no history compaction for repeated observation tools.
+category: timeout
+severity: medium
+provenance: github-inspired
+mitigation: Cap poll loops and compress/omit prior DOM snapshots from history between polls.
+prompt: Monitor the dashboard until the status is green, then stop.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: fetch_dashboard_state
+  behavior: success
+  status: 200
+  delay_ms: 20
+  body: '{"status": "yellow", "dom": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+assertions:
+- type: max_tool_calls
+  tool: fetch_dashboard_state
+  max: 3
+- type: max_duration_sec
+  max: 20
+- type: must_stop
+tags:
+- polling
+- history-growth
+source:
+  type: github
+  id: derived-5747
+  url: https://github.com/browser-use/browser-use/issues/5747
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.

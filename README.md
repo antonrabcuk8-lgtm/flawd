@@ -8,7 +8,7 @@ AI agents fail in production in predictable, expensive ways: infinite tool-calli
 
 **Flawd** ships a machine-readable catalog of failure cards (`FLAWD-YYYY-XXXX`) and a lightweight runner that stress-tests **OpenAI-compatible tool-calling agents** before you ship.
 
-Honest labeling: the core suite is **7 GitHub-inspired** cards (adapted from public issues) and **5 synthetic** combat cards for common failure classes. See [`database/README.md`](database/README.md).
+Honest labeling: the verified suite is **25 cards** (mostly GitHub-inspired adaptations + some synthetic combat cards). See [`database/README.md`](database/README.md).
 
 ## Proof of Concept (reference agents)
 
@@ -16,8 +16,8 @@ These are **reference agents written to demonstrate the runner**, not third-part
 
 | Target Agent | Protection Level | Score | Outcome |
 | :--- | :--- | :--- | :--- |
-| `examples/vulnerable_agent.py` | Raw tools, no guards | **0 / 12 PASS** | Retry loops, injection follow-through, side-effect re-runs |
-| `examples/hardened_agent.py` | Retry limits, idempotency, denylist | **12 / 12 PASS** | Stops cleanly, blocks injections, respects budgets |
+| `examples/vulnerable_agent.py` | Raw tools, no guards | **0 / 25 PASS** | Retry loops, injection follow-through, side-effect re-runs |
+| `examples/hardened_agent.py` | Retry limits, idempotency, denylist | **25 / 25 PASS** | Stops cleanly, blocks injections, respects budgets |
 
 CI re-runs this check on every push: [Actions](https://github.com/antonrabcuk8-lgtm/flawd/actions).
 
@@ -35,7 +35,24 @@ uvicorn examples.vulnerable_agent:app --host 127.0.0.1 --port 8000
 python -m runner.cli --target http://127.0.0.1:8000/v1/chat/completions --fast --report report.md --format markdown
 ```
 
-Expected on the vulnerable reference agent: **0 / 12 PASS**.
+Expected on the vulnerable reference agent: **0 / 25 PASS**.
+
+Hardened reference:
+
+```bash
+uvicorn examples.hardened_agent:app --host 127.0.0.1 --port 8001
+python -m runner.cli --target http://127.0.0.1:8001/v1/chat/completions --fast
+```
+
+Expected: **25 / 25 PASS**.
+
+### Gate 1 on saved GitHub finds
+
+```bash
+python -m collector.gate1 --from-state --run --report
+```
+
+Imports `state.db` → `pipeline.db`, classifies agent failures, clusters duplicates, prints the funnel.
 
 ## Test your own agent
 

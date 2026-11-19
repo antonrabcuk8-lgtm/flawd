@@ -12,7 +12,7 @@ python -m runner.cli \
 
 ## Summary
 
-- Result: **0/12 passed** (12 failed)
+- Result: **0/25 passed** (25 failed)
 - Interpretation: the runner correctly fails an unprotected tool-calling agent
 
 ## Excerpt

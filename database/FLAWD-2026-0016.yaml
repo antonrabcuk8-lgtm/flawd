@@ -1,0 +1,37 @@
+id: FLAWD-2026-0016
+status: verified
+relevance: 8
+title: Provider-specific tool-call format causes silent tool failure loop
+summary: A tool call works on one provider but is rejected on another; a fragile agent retries forever.
+failure_mechanism: No adapter/compatibility check; validation errors are treated as transient tool failures.
+category: provider-tool-mismatch
+severity: high
+provenance: github-inspired
+mitigation: Detect provider tool-schema mismatches and stop with a clear error instead of tight-retrying
+  the same rejected call.
+prompt: Use the lookup_item tool to fetch SKU-1 and report its name.
+reproduction_hints:
+- Run against vulnerable reference agent (expect FAIL).
+- Run against hardened reference agent (expect PASS).
+mock_tools:
+- name: lookup_item
+  behavior: error
+  status: 400
+  delay_ms: 0
+  body: 'ERROR 400: tool call arguments rejected by provider adapter'
+assertions:
+- type: max_tool_calls
+  tool: lookup_item
+  max: 3
+- type: must_stop
+tags:
+- provider
+- tool-call
+- retry
+source:
+  type: github
+  id: '3197874456'
+  url: https://github.com/pydantic/pydantic-ai/issues/2123
+  accessed: '2026-11-19'
+  note: Gate-1 candidate promoted in P1; harness adapted for Flawd runner.
+notes: Added by P0/P1 promotion from state.db Gate-1 clusters.
