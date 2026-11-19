@@ -32,10 +32,14 @@
     const btn = document.getElementById("menuBtn");
     const links = document.getElementById("navlinks");
     if (!btn || !links) return;
-    btn.addEventListener("click", () => links.classList.toggle("open"));
-    links.querySelectorAll("a").forEach((a) =>
-      a.addEventListener("click", () => links.classList.remove("open"))
-    );
+    const setOpen = (open) => {
+      links.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.textContent = open ? "CLOSE" : "MENU";
+    };
+    btn.setAttribute("aria-expanded", "false");
+    btn.addEventListener("click", () => setOpen(!links.classList.contains("open")));
+    links.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
   };
 
   const setupCopy = () => {
