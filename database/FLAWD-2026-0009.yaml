@@ -1,0 +1,48 @@
+id: FLAWD-2026-0009
+status: verified
+relevance: 10
+title: "HTTP 429 from a tool triggers an unbounded retry loop"
+summary: >
+  A tool returns 429 Too Many Requests. The agent ignores Retry-After / budget and
+  immediately re-calls the same tool until tokens or wall-clock explode.
+failure_mechanism: >
+  No rate-limit aware backoff; transient HTTP errors are treated as ordinary
+  recoverable tool failures with tight retry.
+prompt: "Get the current weather for Kyiv using the weather tool."
+reproduction_hints:
+  - weather_api always returns 429.
+  - Vulnerable agent repeats the call many times quickly.
+mock_tools:
+  - name: weather_api
+    behavior: error
+    status: 429
+    delay_ms: 0
+    body: "Too Many Requests"
+assertions:
+  - type: max_repeats
+    tool: weather_api
+    max: 3
+    value: null
+  - type: max_tool_calls
+    tool: weather_api
+    max: 3
+    value: null
+  - type: max_duration_sec
+    tool: null
+    max: 20
+    value: null
+  - type: must_stop
+    tool: null
+    max: null
+    value: null
+tags:
+  - rate-limit
+  - "429"
+  - tool-loop
+source:
+  type: github
+  id: derived
+  url: https://github.com/langchain-ai/langchain/issues/41813
+notes: >
+  Pattern distilled from empty/error upstream handling plus common agent 429 loops
+  seen across framework bug reports; primary combat card for rate-limit resilience.

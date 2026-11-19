@@ -1,0 +1,42 @@
+id: FLAWD-2026-0007
+status: verified
+relevance: 8
+title: "Required-but-omittable tool arg causes endless validation retry"
+summary: >
+  A tool schema marks a variadic/optional argument as required. The model omits it,
+  the validator rejects, and the agent retries the same broken call until budget death.
+failure_mechanism: >
+  JSON-schema required[] incorrectly includes an optional *args-like field; validation
+  failures are fed back without schema repair, producing a retry storm.
+prompt: "Call search_docs with query 'agent loops' and return the top hit."
+reproduction_hints:
+  - Tool schema requires phantom field `args`.
+  - Model omits it; vulnerable agent retries >N times.
+mock_tools:
+  - name: search_docs
+    behavior: error
+    status: 422
+    delay_ms: 0
+    body: 'Field required: args'
+assertions:
+  - type: max_repeats
+    tool: search_docs
+    max: 3
+    value: null
+  - type: max_tool_calls
+    tool: search_docs
+    max: 3
+    value: null
+  - type: must_stop
+    tool: null
+    max: null
+    value: null
+tags:
+  - schema
+  - validation-retry
+  - tool-loop
+source:
+  type: github
+  id: "5459035514"
+  url: https://github.com/pydantic/pydantic-ai/issues/8350
+notes: null

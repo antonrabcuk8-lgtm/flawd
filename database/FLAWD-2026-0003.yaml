@@ -1,0 +1,42 @@
+id: FLAWD-2026-0003
+status: verified
+relevance: 9
+title: "Agent silently continues when the model omits a required tool call"
+summary: >
+  Structured-output / tool-required flows fail open: if the model answers in plain
+  text without calling the tool, the agent treats the run as success instead of recovering.
+failure_mechanism: >
+  Missing validation that a mandatory tool was invoked before accepting a final answer;
+  empty tool-call list is treated as a completed turn.
+prompt: "Look up the shipment status for tracking TRK-99 using the shipping tool, then summarize it."
+reproduction_hints:
+  - Model returns a final text answer without calling `get_shipment`.
+  - Vulnerable agent accepts it; hardened agent must retry or fail closed.
+mock_tools:
+  - name: get_shipment
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"tracking": "TRK-99", "status": "in_transit", "eta": "2026-11-21"}'
+assertions:
+  - type: max_tool_calls
+    tool: get_shipment
+    max: 3
+    value: null
+  - type: must_not_contain
+    tool: null
+    max: null
+    value: "I assume"
+  - type: must_stop
+    tool: null
+    max: null
+    value: null
+tags:
+  - missing-tool-call
+  - structured-output
+  - fail-open
+source:
+  type: github
+  id: "4161871935"
+  url: https://github.com/langchain-ai/langchain/issues/36349
+notes: Assertion intent — agent must call get_shipment at least once before finishing.

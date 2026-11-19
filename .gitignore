@@ -1,0 +1,37 @@
+# Secrets & local env
+.env
+.env.*
+!.env.example
+
+# Local collector state (raw issue bodies / dedup DB)
+state.db
+state.db-*
+*.db-journal
+
+# Crash-test reports (regenerated locally / in CI)
+report.json
+report.md
+reports/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.Python
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

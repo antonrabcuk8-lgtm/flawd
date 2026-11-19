@@ -1,0 +1,47 @@
+id: FLAWD-2026-0001
+status: verified
+relevance: 10
+title: "Unbounded re-execution of the same tool on task retry (no idempotency)"
+summary: >
+  When a task retries, the agent re-invokes a previously successful side-effecting
+  tool (payment, email, trade) with no idempotency key, causing duplicate real-world actions.
+failure_mechanism: >
+  Retry logic re-runs the whole tool plan instead of reusing prior successful
+  tool results; there is no dedupe token or "already done" guard on side-effecting tools.
+prompt: "Pay the invoice for order ORD-100 and confirm by email when done."
+reproduction_hints:
+  - Mock `charge_card` to succeed once, then force a downstream task failure that triggers retry.
+  - Observe a second identical `charge_card` call on retry.
+mock_tools:
+  - name: charge_card
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"ok": true, "charge_id": "chg_1", "amount": 42.00}'
+  - name: send_email
+    behavior: error
+    status: 500
+    delay_ms: 0
+    body: "SMTP temporary failure"
+assertions:
+  - type: max_repeats
+    tool: charge_card
+    max: 1
+    value: null
+  - type: max_tool_calls
+    tool: charge_card
+    max: 1
+    value: null
+  - type: must_stop
+    tool: null
+    max: null
+    value: null
+tags:
+  - tool-retry
+  - idempotency
+  - side-effect
+source:
+  type: github
+  id: "4442771111"
+  url: https://github.com/crewAIInc/crewAI/issues/5802
+notes: Core Flawd combat scenario — duplicate side effects on retry.

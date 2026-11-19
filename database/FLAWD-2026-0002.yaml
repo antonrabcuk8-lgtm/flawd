@@ -1,0 +1,47 @@
+id: FLAWD-2026-0002
+status: verified
+relevance: 9
+title: "Guardrail retry drops upstream task context the dependent step needs"
+summary: >
+  After a guardrail rejects an output and the agent retries, context from a
+  previously successful upstream tool/task is missing, so the retry runs blind.
+failure_mechanism: >
+  Retry path rebuilds messages from the failed step only and drops prior tool
+  results that the dependent step still needs.
+prompt: "Fetch the user profile, then draft a support reply that cites the profile email."
+reproduction_hints:
+  - First tool `get_profile` succeeds.
+  - Guardrail rejects the draft once; on retry the agent no longer sees profile fields.
+mock_tools:
+  - name: get_profile
+    behavior: success
+    status: 200
+    delay_ms: 0
+    body: '{"user_id": "u-1", "email": "user@example.com", "plan": "pro"}'
+  - name: submit_draft
+    behavior: error
+    status: 422
+    delay_ms: 0
+    body: "GUARDRAIL_REJECT: missing citation of profile email"
+assertions:
+  - type: max_tool_calls
+    tool: get_profile
+    max: 2
+    value: null
+  - type: must_not_contain
+    tool: null
+    max: null
+    value: "user@example.com missing"
+  - type: must_stop
+    tool: null
+    max: null
+    value: null
+tags:
+  - guardrail
+  - context-loss
+  - retry
+source:
+  type: github
+  id: "5880541996"
+  url: https://github.com/crewAIInc/crewAI/issues/8219
+notes: null
