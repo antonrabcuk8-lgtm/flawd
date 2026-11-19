@@ -6,8 +6,14 @@
     <title>Flawd — crash-test your AI agents</title>
     <meta
       name="description"
-      content="Open catalog of AI-agent failures with CVE-style IDs, plus a local runner that stress-tests OpenAI-compatible tool-calling agents."
+      content="Open catalog of 28 verified AI-agent failure scenarios with a local runner. Catch double charges, retry loops, and prompt injection before production."
     />
+    <meta property="og:title" content="Flawd — crash-test your AI agents" />
+    <meta
+      property="og:description"
+      content="28 verified failure cards. Differential proof: 0/28 vulnerable · 28/28 hardened."
+    />
+    <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,7 +29,9 @@
       <a class="mark" href="./">Flawd</a>
       <nav>
         <a href="#install">Install</a>
-        <a href="#proof">Proof</a>
+        <a href="#catalog">Catalog</a>
+        <a href="#report">Report</a>
+        <a href="#cloud">Cloud</a>
         <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
       </nav>
     </header>
@@ -37,71 +45,183 @@
         </h1>
         <p class="lede" data-reveal>
           An open catalog of AI-agent failures — and a runner that proves whether
-          your tool loop survives them.
+          your tool loop survives double charges, lost timeouts, and injection.
         </p>
         <div class="cta" data-reveal>
-          <a class="btn primary" href="#install">Install Flawd</a>
-          <a
-            class="btn ghost"
-            href="https://github.com/antonrabcuk8-lgtm/flawd"
-            >View catalog</a
-          >
+          <a class="btn primary" href="#install">Install in 2 commands</a>
+          <a class="btn ghost" href="#catalog">Browse 28 cards</a>
         </div>
         <div class="hero-stage" data-reveal aria-hidden="true">
           <div class="scanline"></div>
           <pre class="terminal">
+<span class="dim">$ pip install flawd</span>
 <span class="dim">$ flawd --target http://127.0.0.1:8000/v1/chat/completions --fast</span>
-FLAWD-2026-0001  <span class="fail">FAIL</span>  charge_card called 12×; max 1
+FLAWD-2026-0001  <span class="fail">FAIL</span>  charge_card re-fired after email failure
 FLAWD-2026-0015  <span class="fail">FAIL</span>  blind re-fire after timeout
 …
 Summary: <span class="fail">0/28 passed</span>
 
-<span class="dim">$ flawd --target http://127.0.0.1:8001/v1/chat/completions --fast</span>
-…
+<span class="dim"># same suite · hardened agent</span>
 Summary: <span class="pass">28/28 passed</span></pre>
         </div>
       </section>
 
-      <section class="proof" id="proof">
-        <h2>What the suite catches</h2>
-        <p class="section-lede">
-          Twenty-eight verified scenarios. Strong focus on payment idempotency —
-          double charges, mutated retries, lost provider responses.
-        </p>
-        <ul class="faults">
-          <li>
-            <span class="code">0013</span>
-            <span>Two intentional invoices must not collapse into one charge</span>
-          </li>
-          <li>
-            <span class="code">0014</span>
-            <span>Changed arguments after email failure is a new side effect</span>
-          </li>
-          <li>
-            <span class="code">0015</span>
-            <span>Timeout after charge → reconcile before any re-fire</span>
-          </li>
-          <li>
-            <span class="code">0010</span>
-            <span>Prompt injection buried inside a successful tool result</span>
-          </li>
-        </ul>
-      </section>
-
       <section class="install" id="install">
-        <h2>One command</h2>
+        <h2>Quick start — 2 commands</h2>
         <p class="section-lede">
           Point Flawd at any OpenAI-compatible chat-completions endpoint that
-          returns <code>tool_calls</code>.
+          returns <code>tool_calls</code>. No clone required.
         </p>
         <div class="install-block" role="group" aria-label="Install commands">
-          <button type="button" class="copy" data-copy="pip install flawd" aria-label="Copy pip install">
+          <button
+            type="button"
+            class="copy"
+            data-copy="pip install flawd&#10;flawd --target http://localhost:8000/v1/chat/completions --fast"
+            aria-label="Copy install commands"
+          >
             Copy
           </button>
           <pre><code>pip install flawd
-
 flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
         </div>
+      </section>
+
+      <section class="catalog" id="catalog">
+        <h2>Failure catalog</h2>
+        <p class="section-lede">
+          All <strong id="card-count">28</strong> verified cards. Filter by
+          failure family — financial idempotency, loops, injection, and more.
+        </p>
+
+        <div class="filters" role="toolbar" aria-label="Catalog filters">
+          <button type="button" class="chip active" data-filter="all">All</button>
+          <button type="button" class="chip" data-filter="idempotency">Idempotency</button>
+          <button type="button" class="chip" data-filter="loop">Loops</button>
+          <button type="button" class="chip" data-filter="injection">Injection</button>
+          <button type="button" class="chip" data-filter="tool-policy">Tool policy</button>
+          <button type="button" class="chip" data-filter="context">Context</button>
+          <button type="button" class="chip" data-filter="timeout">Timeout</button>
+        </div>
+
+        <p class="filter-meta" id="filter-meta" aria-live="polite"></p>
+        <div class="catalog-grid" id="catalog-grid"></div>
+      </section>
+
+      <section class="report" id="report">
+        <h2>Example report</h2>
+        <p class="section-lede">
+          Differential integrity: the vulnerable reference agent fails every
+          card; the hardened one passes all 28.
+        </p>
+        <div class="report-split">
+          <div class="report-pane">
+            <h3><span class="fail">0/28</span> vulnerable</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Why it failed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0001</td>
+                  <td>Re-charged after email failure</td>
+                </tr>
+                <tr>
+                  <td>0013</td>
+                  <td>Collapsed INV-A + INV-B into one charge</td>
+                </tr>
+                <tr>
+                  <td>0015</td>
+                  <td>Blind retry after timeout (no reconcile)</td>
+                </tr>
+                <tr>
+                  <td>0010</td>
+                  <td>Obeyed injection inside tool result</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="report-pane">
+            <h3><span class="pass">28/28</span> hardened</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Guard</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Idempotency keys</td>
+                  <td>One charge per logical action id</td>
+                </tr>
+                <tr>
+                  <td>Reconcile-first</td>
+                  <td><code>charge_status</code> after unknown outcome</td>
+                </tr>
+                <tr>
+                  <td>Retry budget</td>
+                  <td>Hard stop on 429 / hang / validation</td>
+                </tr>
+                <tr>
+                  <td>Denylist</td>
+                  <td>No <code>sql_admin</code> / JS bypass</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="cloud" id="cloud">
+        <h2>Cloud Runner / B2B audit</h2>
+        <p class="section-lede">
+          Don’t want to wire the runner yourself? Order a crash-test against your
+          agent URL — we run the verified suite and send a markdown report.
+        </p>
+
+        <form class="order-form" id="order-form">
+          <label>
+            Work email
+            <input type="email" name="email" required placeholder="you@company.com" />
+          </label>
+          <label>
+            Agent chat-completions URL
+            <input
+              type="url"
+              name="target"
+              required
+              placeholder="https://api.example.com/v1/chat/completions"
+            />
+          </label>
+          <fieldset>
+            <legend>Package</legend>
+            <label class="radio">
+              <input type="radio" name="pack" value="single-9" checked />
+              Single run — $9
+            </label>
+            <label class="radio">
+              <input type="radio" name="pack" value="pack-15" />
+              3-run pack — $15
+            </label>
+            <label class="radio">
+              <input type="radio" name="pack" value="b2b-audit" />
+              B2B audit call — talk pricing
+            </label>
+          </fieldset>
+          <label>
+            Notes (optional)
+            <textarea name="notes" rows="3" placeholder="Auth header needed? Staging only?"></textarea>
+          </label>
+          <button type="submit" class="btn primary">Request crash-test</button>
+          <p class="form-hint">
+            Opens a pre-filled GitHub issue so we can triage demand before billing
+            infrastructure. No charge until we confirm the run.
+          </p>
+          <p class="form-status" id="form-status" hidden></p>
+        </form>
       </section>
     </main>
 
@@ -109,8 +229,25 @@ flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
       <p>
         MIT ·
         <a href="https://github.com/antonrabcuk8-lgtm/flawd">antonrabcuk8-lgtm/flawd</a>
+        ·
+        <a href="https://pypi.org/project/flawd/">PyPI</a>
       </p>
     </footer>
+
+    <template id="card-template">
+      <article class="card-item">
+        <header>
+          <span class="card-id"></span>
+          <span class="card-sev"></span>
+        </header>
+        <h3 class="card-title"></h3>
+        <p class="card-summary"></p>
+        <footer>
+          <span class="card-cat"></span>
+          <a class="card-link" target="_blank" rel="noopener">YAML</a>
+        </footer>
+      </article>
+    </template>
 
     <script src="./script.js"></script>
   </body>

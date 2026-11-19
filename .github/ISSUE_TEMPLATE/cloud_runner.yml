@@ -1,0 +1,38 @@
+name: Cloud Runner / B2B audit request
+description: Order a hosted crash-test against your agent URL
+title: "[Cloud Runner] request"
+labels: ["cloud-runner"]
+body:
+  - type: input
+    id: email
+    attributes:
+      label: Work email
+      placeholder: you@company.com
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Agent chat-completions URL
+      placeholder: https://api.example.com/v1/chat/completions
+    validations:
+      required: true
+  - type: dropdown
+    id: pack
+    attributes:
+      label: Package
+      options:
+        - Single run ($9)
+        - 3-run pack ($15)
+        - B2B audit call (talk pricing)
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Auth headers, staging constraints, deadline…
+  - type: markdown
+    attributes:
+      value: |
+        No payment is collected via GitHub. We confirm the run over email first.

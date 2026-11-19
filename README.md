@@ -8,7 +8,11 @@ AI agents fail in production in predictable, expensive ways: infinite tool-calli
 
 **Flawd** ships a machine-readable catalog of failure cards (`FLAWD-YYYY-XXXX`) and a lightweight runner that stress-tests **OpenAI-compatible tool-calling agents** before you ship.
 
-Honest labeling: the verified suite is **28 cards** (GitHub-inspired adaptations + synthetic combat cards, with a strong payment-idempotency focus). See [`database/README.md`](database/README.md). Showcase: [antonrabcuk8-lgtm.github.io/flawd](https://antonrabcuk8-lgtm.github.io/flawd/).
+Honest labeling: the verified suite is **28 cards** (GitHub-inspired adaptations + synthetic combat cards, with a strong payment-idempotency focus). See [`database/README.md`](database/README.md).
+
+**Showcase:** [antonrabcuk8-lgtm.github.io/flawd](https://antonrabcuk8-lgtm.github.io/flawd/) — interactive catalog, sample reports, 2-command install, Cloud Runner request form.
+
+Launch copy drafts: [`docs/ANNOUNCEMENT.md`](docs/ANNOUNCEMENT.md).
 
 ## Proof of Concept (reference agents)
 
