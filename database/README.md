@@ -14,7 +14,7 @@
 - **github-inspired** — grounded in a public GitHub issue; harness is a Flawd adaptation
 - **synthetic** — constructed combat card (may cite related issues for motivation)
 
-## Verified suite (25)
+## Verified suite (28)
 
 | ID | Category | Severity | Provenance |
 |----|----------|----------|------------|
@@ -30,6 +30,9 @@
 | [0010](FLAWD-2026-0010.yaml) | prompt-injection | critical | synthetic |
 | [0011](FLAWD-2026-0011.yaml) | timeout | high | synthetic |
 | [0012](FLAWD-2026-0012.yaml) | malformed-json | medium | synthetic |
+| [0013](FLAWD-2026-0013.yaml) | idempotency | high | synthetic |
+| [0014](FLAWD-2026-0014.yaml) | idempotency | high | synthetic |
+| [0015](FLAWD-2026-0015.yaml) | idempotency | critical | synthetic |
 | [0016](FLAWD-2026-0016.yaml) | provider-tool-mismatch | high | github-inspired |
 | [0017](FLAWD-2026-0017.yaml) | context-poison | high | github-inspired |
 | [0018](FLAWD-2026-0018.yaml) | context-loss | medium | github-inspired |
@@ -44,15 +47,9 @@
 | [0027](FLAWD-2026-0027.yaml) | schema-retry | medium | synthetic |
 | [0028](FLAWD-2026-0028.yaml) | missing-tool-call | high | synthetic |
 
-**Counts:** 25 verified (≈19 github-inspired · ≈6 synthetic) · 3 draft follow-ups (`0013`–`0015`)
+**Counts:** 28 verified (≈19 github-inspired · ≈9 synthetic) · 0 drafts in-catalog
 
-## Draft follow-ups
-
-| ID | Title | Status |
-|----|-------|--------|
-| [0013](FLAWD-2026-0013.yaml) | Two intentional identical charges | draft |
-| [0014](FLAWD-2026-0014.yaml) | Retry with changed arguments | draft |
-| [0015](FLAWD-2026-0015.yaml) | Lost response after charge | draft |
+Payment-idempotency focus cards: `0001`, `0013`, `0014`, `0015`.
 
 ## Required fields
 

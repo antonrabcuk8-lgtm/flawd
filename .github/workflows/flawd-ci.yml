@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -e ".[agents]"
 
       - name: Start vulnerable agent
         run: |
@@ -34,10 +34,10 @@ jobs:
           echo "vulnerable agent failed to become healthy" >&2
           exit 1
 
-      - name: Verify Vulnerable Agent catches failures (expecting 0/12)
+      - name: Verify Vulnerable Agent catches failures (expecting 0/28)
         run: |
           # Runner exits 1 when scenarios fail — that is the expected outcome here.
-          if python -m runner.cli \
+          if flawd \
             --target http://127.0.0.1:8000/v1/chat/completions \
             --fast \
             --report vulnerable_report.md \
@@ -57,9 +57,9 @@ jobs:
           echo "hardened agent failed to become healthy" >&2
           exit 1
 
-      - name: Verify Hardened Agent passes all scenarios (expecting 12/12)
+      - name: Verify Hardened Agent passes all scenarios (expecting 28/28)
         run: |
-          python -m runner.cli \
+          flawd \
             --target http://127.0.0.1:8001/v1/chat/completions \
             --fast \
             --report hardened_report.md \

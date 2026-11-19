@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flawd — crash-test your AI agents</title>
+    <meta
+      name="description"
+      content="Open catalog of AI-agent failures with CVE-style IDs, plus a local runner that stress-tests OpenAI-compatible tool-calling agents."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="top">
+      <a class="mark" href="./">Flawd</a>
+      <nav>
+        <a href="#install">Install</a>
+        <a href="#proof">Proof</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="brand" data-reveal>Flawd</p>
+        <h1 data-reveal>
+          Crash-test your agents<br />
+          before they charge twice.
+        </h1>
+        <p class="lede" data-reveal>
+          An open catalog of AI-agent failures — and a runner that proves whether
+          your tool loop survives them.
+        </p>
+        <div class="cta" data-reveal>
+          <a class="btn primary" href="#install">Install Flawd</a>
+          <a
+            class="btn ghost"
+            href="https://github.com/antonrabcuk8-lgtm/flawd"
+            >View catalog</a
+          >
+        </div>
+        <div class="hero-stage" data-reveal aria-hidden="true">
+          <div class="scanline"></div>
+          <pre class="terminal">
+<span class="dim">$ flawd --target http://127.0.0.1:8000/v1/chat/completions --fast</span>
+FLAWD-2026-0001  <span class="fail">FAIL</span>  charge_card called 12×; max 1
+FLAWD-2026-0015  <span class="fail">FAIL</span>  blind re-fire after timeout
+…
+Summary: <span class="fail">0/28 passed</span>
+
+<span class="dim">$ flawd --target http://127.0.0.1:8001/v1/chat/completions --fast</span>
+…
+Summary: <span class="pass">28/28 passed</span></pre>
+        </div>
+      </section>
+
+      <section class="proof" id="proof">
+        <h2>What the suite catches</h2>
+        <p class="section-lede">
+          Twenty-eight verified scenarios. Strong focus on payment idempotency —
+          double charges, mutated retries, lost provider responses.
+        </p>
+        <ul class="faults">
+          <li>
+            <span class="code">0013</span>
+            <span>Two intentional invoices must not collapse into one charge</span>
+          </li>
+          <li>
+            <span class="code">0014</span>
+            <span>Changed arguments after email failure is a new side effect</span>
+          </li>
+          <li>
+            <span class="code">0015</span>
+            <span>Timeout after charge → reconcile before any re-fire</span>
+          </li>
+          <li>
+            <span class="code">0010</span>
+            <span>Prompt injection buried inside a successful tool result</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="install" id="install">
+        <h2>One command</h2>
+        <p class="section-lede">
+          Point Flawd at any OpenAI-compatible chat-completions endpoint that
+          returns <code>tool_calls</code>.
+        </p>
+        <div class="install-block" role="group" aria-label="Install commands">
+          <button type="button" class="copy" data-copy="pip install flawd" aria-label="Copy pip install">
+            Copy
+          </button>
+          <pre><code>pip install flawd
+
+flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        MIT ·
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd">antonrabcuk8-lgtm/flawd</a>
+      </p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

@@ -10,7 +10,21 @@ import yaml
 from pydantic import BaseModel, Field, field_validator
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATABASE = ROOT / "database"
+
+
+def _resolve_default_database() -> Path:
+    """Prefer packaged catalog; fall back to repo-root database/."""
+    try:
+        from database import CATALOG_DIR  # type: ignore
+
+        if CATALOG_DIR.is_dir() and any(CATALOG_DIR.glob("FLAWD-*.yaml")):
+            return CATALOG_DIR
+    except Exception:
+        pass
+    return ROOT / "database"
+
+
+DEFAULT_DATABASE = _resolve_default_database()
 
 
 class ToolBehavior(str, Enum):

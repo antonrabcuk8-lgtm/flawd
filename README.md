@@ -8,7 +8,7 @@ AI agents fail in production in predictable, expensive ways: infinite tool-calli
 
 **Flawd** ships a machine-readable catalog of failure cards (`FLAWD-YYYY-XXXX`) and a lightweight runner that stress-tests **OpenAI-compatible tool-calling agents** before you ship.
 
-Honest labeling: the verified suite is **25 cards** (mostly GitHub-inspired adaptations + some synthetic combat cards). See [`database/README.md`](database/README.md).
+Honest labeling: the verified suite is **28 cards** (GitHub-inspired adaptations + synthetic combat cards, with a strong payment-idempotency focus). See [`database/README.md`](database/README.md). Showcase: [antonrabcuk8-lgtm.github.io/flawd](https://antonrabcuk8-lgtm.github.io/flawd/).
 
 ## Proof of Concept (reference agents)
 
@@ -16,35 +16,45 @@ These are **reference agents written to demonstrate the runner**, not third-part
 
 | Target Agent | Protection Level | Score | Outcome |
 | :--- | :--- | :--- | :--- |
-| `examples/vulnerable_agent.py` | Raw tools, no guards | **0 / 25 PASS** | Retry loops, injection follow-through, side-effect re-runs |
-| `examples/hardened_agent.py` | Retry limits, idempotency, denylist | **25 / 25 PASS** | Stops cleanly, blocks injections, respects budgets |
+| `examples/vulnerable_agent.py` | Raw tools, no guards | **0 / 28 PASS** | Retry loops, injection follow-through, side-effect re-runs |
+| `examples/hardened_agent.py` | Retry limits, idempotency, denylist | **28 / 28 PASS** | Stops cleanly, blocks injections, respects budgets |
 
 CI re-runs this check on every push: [Actions](https://github.com/antonrabcuk8-lgtm/flawd/actions).
+
+## Install
+
+```bash
+pip install flawd
+# from a clone / for reference agents:
+pip install -e ".[agents]"
+```
+
+Entry points: `flawd` and `python -m flawd` (same CLI as `python -m runner.cli`).
 
 ## Quickstart
 
 ```bash
 git clone https://github.com/antonrabcuk8-lgtm/flawd.git
 cd flawd
-pip install -r requirements.txt
+pip install -e ".[agents]"
 
 # terminal A
 uvicorn examples.vulnerable_agent:app --host 127.0.0.1 --port 8000
 
 # terminal B
-python -m runner.cli --target http://127.0.0.1:8000/v1/chat/completions --fast --report report.md --format markdown
+flawd --target http://127.0.0.1:8000/v1/chat/completions --fast --report report.md --format markdown
 ```
 
-Expected on the vulnerable reference agent: **0 / 25 PASS**.
+Expected on the vulnerable reference agent: **0 / 28 PASS**.
 
 Hardened reference:
 
 ```bash
 uvicorn examples.hardened_agent:app --host 127.0.0.1 --port 8001
-python -m runner.cli --target http://127.0.0.1:8001/v1/chat/completions --fast
+flawd --target http://127.0.0.1:8001/v1/chat/completions --fast
 ```
 
-Expected: **25 / 25 PASS**.
+Expected: **28 / 28 PASS**.
 
 ### Gate 1 on saved GitHub finds
 
@@ -63,7 +73,7 @@ Flawd talks to your agent over the **OpenAI Chat Completions + `tools` / `tool_c
 3. Point the runner at that URL:
 
 ```bash
-python -m runner.cli \
+flawd \
   --target http://localhost:YOUR_PORT/v1/chat/completions \
   --fast \
   --report my-agent-report.md \
@@ -95,7 +105,7 @@ Vulnerable reference agent (excerpt):
 
 ```markdown
 # Flawd crash-test report
-- Result: **0/12 passed** (12 failed)
+- Result: **0/28 passed** (28 failed)
 
 | ID | Status | Reason |
 |----|--------|--------|
@@ -112,6 +122,7 @@ Full sample: [`docs/example-report.md`](docs/example-report.md).
 - `runner/` — loader, mock tools, assertions, HTTP engine, CLI reports
 - `collector/` — harvest/sanitize candidates from GitHub Issues into drafts
 - `examples/` — vulnerable / hardened OpenAI-compatible reference servers
+- `site/` — public showcase (GitHub Pages)
 
 ## Scenario card shape
 
@@ -130,7 +141,7 @@ mock_tools: [...]
 assertions: [...]
 ```
 
-Catalog of all 12 cards: [`database/README.md`](database/README.md).  
+Catalog of all 28 cards: [`database/README.md`](database/README.md).  
 How to contribute: [`CONTRIBUTING.md`](CONTRIBUTING.md).  
 Ingestion quality pipeline (gates, quarantine, trust labels): [`docs/INGESTION_PIPELINE_SPEC.md`](docs/INGESTION_PIPELINE_SPEC.md).
 

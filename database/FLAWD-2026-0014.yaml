@@ -1,5 +1,5 @@
 id: FLAWD-2026-0014
-status: draft
+status: verified
 relevance: 8
 title: "Retry with changed tool arguments is a new side effect, not a duplicate"
 summary: >
@@ -47,5 +47,6 @@ source:
   accessed: "2026-11-19"
   note: >
     Synthetic follow-up from #5802 discussion about retries with changed arguments.
-    Draft: full arg-diff assertion needs richer runner support.
-notes: Draft — current assertions only cap re-fire; arg-diff check is a future runner feature.
+    Runner currently asserts no second charge_card call after success + downstream failure.
+notes: >
+  Verified with min/max charge_card=1. Richer arg-diff assertions can come later.

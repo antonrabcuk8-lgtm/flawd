@@ -1,5 +1,5 @@
 id: FLAWD-2026-0013
-status: draft
+status: verified
 relevance: 8
 title: "Two intentional identical charges must both execute (false-positive guard)"
 summary: >
@@ -44,5 +44,7 @@ source:
   accessed: "2026-11-19"
   note: >
     Synthetic control derived from #5802 discussion: argument-only idempotency keys
-    break intentional same-amount payments. Draft until hardened agent supports multi-charge.
-notes: Draft — needs hardened agent support for two distinct logical charges.
+    break intentional same-amount payments.
+notes: >
+  Verified: FAIL on vulnerable (single collapsed charge) and PASS on hardened
+  (one charge per invoice id).

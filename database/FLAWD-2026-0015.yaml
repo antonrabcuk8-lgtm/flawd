@@ -1,5 +1,5 @@
 id: FLAWD-2026-0015
-status: draft
+status: verified
 relevance: 9
 title: "Lost response after a successful charge must not blindly re-fire"
 summary: >
@@ -52,6 +52,6 @@ source:
   url: https://github.com/crewAIInc/crewAI/issues/5802
   accessed: "2026-11-19"
   note: >
-    Synthetic follow-up from #5802 discussion: lost provider response after a possible
-    success. Draft until hardened agent implements reconcile-before-retry.
-notes: Draft — requires hardened agent to call charge_status after unknown charge outcome.
+    Synthetic follow-up from #5802 discussion: lost provider response after a possible success.
+notes: >
+  Verified: hardened reconciles via charge_status after timeout; vulnerable blind-retries charge_card.
