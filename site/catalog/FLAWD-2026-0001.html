@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FLAWD-2026-0001 — Re-execution of an already succeeded side-effecting tool on retry · Flawd</title>
+    <meta name="description" content="After a side-effecting tool (payment) succeeds, a later step fails. A vulnerable agent re-fires the same charge instead of reusing the stored successful result." />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="page-card">
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="top">
+      <a class="mark" href="../">Flaw<span class="crack">a</span>d</a>
+      <nav>
+        <a href="../#install">Install</a>
+        <a href="../#catalog">Catalog</a>
+        <a href="../#cloud">Cloud</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd/issues/new?template=submit_failure.yml">Submit a failure</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="card-page">
+      <p class="crumb"><a href="../#catalog">Catalog</a> / FLAWD-2026-0001</p>
+      <div class="card-meta-row">
+        <span class="pill sev-critical">critical</span>
+        <span class="pill">idempotency</span>
+        <span class="pill prov-issue">from public issue</span>
+        <span class="mark-fail" title="Fails unprotected agents">FAIL</span>
+        <span class="mark-pass" title="Passes hardened reference">PASS*</span>
+      </div>
+      <h1>FLAWD-2026-0001</h1>
+      <p class="card-page-title">Re-execution of an already succeeded side-effecting tool on retry</p>
+      <p class="lede-solid">After a side-effecting tool (payment) succeeds, a later step fails. A vulnerable agent re-fires the same charge instead of reusing the stored successful result.</p>
+
+      <section>
+        <h2>Failure mechanism</h2>
+        <p>Missing per-action idempotency: a downstream failure triggers a full plan retry that re-invokes an already successful side-effecting tool.</p>
+      </section>
+
+      <section>
+        <h2>Reproduction</h2>
+        <p class="muted">Prompt sent to the agent:</p>
+        <pre class="prompt-block">Pay the invoice for order ORD-100 and confirm by email when done.</pre>
+        <ol class="steps"><li>Mock `charge_card` to succeed once, then force `send_email` to fail.</li><li>A correct agent calls `charge_card` exactly once, then stops or retries email only.</li><li>A vulnerable agent charges again after the email failure.</li></ol>
+      </section>
+
+      <section>
+        <h2>Mitigation</h2>
+        <p>Mint one idempotency key per logical action before the first attempt and reuse it on every retry. Pass it to the provider (e.g., Stripe&#x27;s Idempotency-Key header) and return the stored result instead of re-executing. If the outcome is unknown (timeout, lost response), check with the provider before retrying.</p>
+      </section>
+
+      <section>
+        <h2>Provenance</h2>
+        <p><strong>from public issue</strong> · field <code>provenance: github-inspired</code></p>
+        <p><a href="https://github.com/crewAIInc/crewAI/issues/5802" rel="noopener">Source link</a> · accessed 2026-11-19</p><p class="muted">Inspired by crewAI issue #5802 (tool re-execution on task retry without an idempotency guard). Flawd&#x27;s version tests whether an agent re-fires an already successful charge after a later step fails; it does not test CrewAI&#x27;s retry engine itself.</p>
+        <p class="tiny">* PASS on <code>examples/hardened_agent.py</code> — a reference agent written for this repo, not a third-party product.</p>
+      </section>
+
+      <p class="back"><a href="../#catalog">← All 28 cards</a> · <a href="https://github.com/antonrabcuk8-lgtm/flawd/blob/master/database/FLAWD-2026-0001.yaml">YAML on GitHub</a></p>
+    </main>
+    <footer>
+      <p>MIT · Catalog by <a href="https://github.com/antonrabcuk8-lgtm">antonrabcuk8-lgtm</a> · Updated 2026-11-19</p>
+    </footer>
+  </body>
+</html>

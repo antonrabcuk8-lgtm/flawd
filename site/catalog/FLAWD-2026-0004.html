@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FLAWD-2026-0004 — Model hammers final_result / submit tool multiple times for one answer · Flawd</title>
+    <meta name="description" content="When the schema looks list-like or the stop condition is weak, the model keeps calling the terminal `final_result` tool repeatedly instead of stopping after one." />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="page-card">
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="top">
+      <a class="mark" href="../">Flaw<span class="crack">a</span>d</a>
+      <nav>
+        <a href="../#install">Install</a>
+        <a href="../#catalog">Catalog</a>
+        <a href="../#cloud">Cloud</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd/issues/new?template=submit_failure.yml">Submit a failure</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="card-page">
+      <p class="crumb"><a href="../#catalog">Catalog</a> / FLAWD-2026-0004</p>
+      <div class="card-meta-row">
+        <span class="pill sev-medium">medium</span>
+        <span class="pill">terminal-loop</span>
+        <span class="pill prov-issue">from public issue</span>
+        <span class="mark-fail" title="Fails unprotected agents">FAIL</span>
+        <span class="mark-pass" title="Passes hardened reference">PASS*</span>
+      </div>
+      <h1>FLAWD-2026-0004</h1>
+      <p class="card-page-title">Model hammers final_result / submit tool multiple times for one answer</p>
+      <p class="lede-solid">When the schema looks list-like or the stop condition is weak, the model keeps calling the terminal `final_result` tool repeatedly instead of stopping after one.</p>
+
+      <section>
+        <h2>Failure mechanism</h2>
+        <p>Terminal tool is not marked as end-of-turn; the loop continues while the model tries to &quot;add more results&quot;.</p>
+      </section>
+
+      <section>
+        <h2>Reproduction</h2>
+        <p class="muted">Prompt sent to the agent:</p>
+        <pre class="prompt-block">Return a single final answer with the capital of France via the final_result tool.</pre>
+        <ol class="steps"><li>Provide only `final_result` as a tool.</li><li>Vulnerable agent allows many identical final_result calls.</li></ol>
+      </section>
+
+      <section>
+        <h2>Mitigation</h2>
+        <p>Treat terminal/submit tools as end-of-turn; allow at most one successful call.</p>
+      </section>
+
+      <section>
+        <h2>Provenance</h2>
+        <p><strong>from public issue</strong> · field <code>provenance: github-inspired</code></p>
+        <p><a href="https://github.com/pydantic/pydantic-ai/issues/1429" rel="noopener">Source link</a></p><p class="muted">Repeated final_result calls for list-like schemas; adapted.</p>
+        <p class="tiny">* PASS on <code>examples/hardened_agent.py</code> — a reference agent written for this repo, not a third-party product.</p>
+      </section>
+
+      <p class="back"><a href="../#catalog">← All 28 cards</a> · <a href="https://github.com/antonrabcuk8-lgtm/flawd/blob/master/database/FLAWD-2026-0004.yaml">YAML on GitHub</a></p>
+    </main>
+    <footer>
+      <p>MIT · Catalog by <a href="https://github.com/antonrabcuk8-lgtm">antonrabcuk8-lgtm</a> · Updated 2026-11-19</p>
+    </footer>
+  </body>
+</html>

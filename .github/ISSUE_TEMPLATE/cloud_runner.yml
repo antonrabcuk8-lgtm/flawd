@@ -1,38 +1,22 @@
-name: Cloud Runner / B2B audit request
-description: Order a hosted crash-test against your agent URL
-title: "[Cloud Runner] request"
+name: Cloud Runner redirect
+description: Do NOT paste private agent URLs or emails here — use the private site form
+title: "[cloud] redirect to private form"
 labels: ["cloud-runner"]
 body:
-  - type: input
-    id: email
-    attributes:
-      label: Work email
-      placeholder: you@company.com
-    validations:
-      required: true
-  - type: input
-    id: target
-    attributes:
-      label: Agent chat-completions URL
-      placeholder: https://api.example.com/v1/chat/completions
-    validations:
-      required: true
-  - type: dropdown
-    id: pack
-    attributes:
-      label: Package
-      options:
-        - Single run ($9)
-        - 3-run pack ($15)
-        - B2B audit call (talk pricing)
-    validations:
-      required: true
-  - type: textarea
-    id: notes
-    attributes:
-      label: Notes
-      description: Auth headers, staging constraints, deadline…
   - type: markdown
     attributes:
       value: |
-        No payment is collected via GitHub. We confirm the run over email first.
+        **Stop — do not put work emails or agent URLs in this public issue.**
+
+        Use the private form on the site instead:
+        https://antonrabcuk8-lgtm.github.io/flawd/#cloud
+
+        That path uses Formspree/email and never publishes your staging endpoint.
+
+        If you only need to say “I’m interested”, leave a one-line note below with **no secrets**.
+  - type: textarea
+    id: note
+    attributes:
+      label: Public note (optional, no secrets)
+      description: e.g. “Interested in B2B audit — will use the private form.”
+      placeholder: Interested — contacting via site form.

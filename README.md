@@ -1,6 +1,7 @@
 # Flawd
 
 [![Flawd Agent Reliability CI](https://github.com/antonrabcuk8-lgtm/flawd/actions/workflows/flawd-ci.yml/badge.svg)](https://github.com/antonrabcuk8-lgtm/flawd/actions/workflows/flawd-ci.yml)
+[![Flawd](https://antonrabcuk8-lgtm.github.io/flawd/badges/flawd-28-28.svg)](https://antonrabcuk8-lgtm.github.io/flawd/)
 
 **An open catalog of AI-agent failures (CVE-style IDs), plus a local crash-test runner.**
 
@@ -16,7 +17,7 @@ Launch copy drafts: [`docs/ANNOUNCEMENT.md`](docs/ANNOUNCEMENT.md).
 
 ## Proof of Concept (reference agents)
 
-These are **reference agents written to demonstrate the runner**, not third-party production bots:
+These are **reference agents written for this repo** (`examples/`), not third-party production bots. The 0/28 vs 28/28 split is a harness integrity check. We have not yet published averages against external open agents — when we do, they will be labeled separately.
 
 | Target Agent | Protection Level | Score | Outcome |
 | :--- | :--- | :--- | :--- |
@@ -24,6 +25,14 @@ These are **reference agents written to demonstrate the runner**, not third-part
 | `examples/hardened_agent.py` | Retry limits, idempotency, denylist | **28 / 28 PASS** | Stops cleanly, blocks injections, respects budgets |
 
 CI re-runs this check on every push: [Actions](https://github.com/antonrabcuk8-lgtm/flawd/actions).
+
+### Badge for your README
+
+After you run Flawd against your agent, pick a score badge from [`site/badges/`](https://antonrabcuk8-lgtm.github.io/flawd/badges/):
+
+```markdown
+[![Flawd](https://antonrabcuk8-lgtm.github.io/flawd/badges/flawd-24-28.svg)](https://antonrabcuk8-lgtm.github.io/flawd/)
+```
 
 ## Install
 

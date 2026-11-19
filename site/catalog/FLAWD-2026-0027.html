@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FLAWD-2026-0027 — Nested server-tool result missing after compaction triggers retry storm · Flawd</title>
+    <meta name="description" content="A non-retryable structural tool error is retried as if transient." />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="page-card">
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="top">
+      <a class="mark" href="../">Flaw<span class="crack">a</span>d</a>
+      <nav>
+        <a href="../#install">Install</a>
+        <a href="../#catalog">Catalog</a>
+        <a href="../#cloud">Cloud</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd/issues/new?template=submit_failure.yml">Submit a failure</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="card-page">
+      <p class="crumb"><a href="../#catalog">Catalog</a> / FLAWD-2026-0027</p>
+      <div class="card-meta-row">
+        <span class="pill sev-medium">medium</span>
+        <span class="pill">schema-retry</span>
+        <span class="pill prov-synthetic">synthetic</span>
+        <span class="mark-fail" title="Fails unprotected agents">FAIL</span>
+        <span class="mark-pass" title="Passes hardened reference">PASS*</span>
+      </div>
+      <h1>FLAWD-2026-0027</h1>
+      <p class="card-page-title">Nested server-tool result missing after compaction triggers retry storm</p>
+      <p class="lede-solid">A non-retryable structural tool error is retried as if transient.</p>
+
+      <section>
+        <h2>Failure mechanism</h2>
+        <p>Error taxonomy missing; all tool errors share the same retry policy.</p>
+      </section>
+
+      <section>
+        <h2>Reproduction</h2>
+        <p class="muted">Prompt sent to the agent:</p>
+        <pre class="prompt-block">Use research_tool to gather facts, then write a short brief.</pre>
+        <ol class="steps"><li>Run against vulnerable reference agent (expect FAIL).</li><li>Run against hardened reference agent (expect PASS).</li></ol>
+      </section>
+
+      <section>
+        <h2>Mitigation</h2>
+        <p>Classify non-retryable structural errors and stop; do not burn retries on immutable history defects.</p>
+      </section>
+
+      <section>
+        <h2>Provenance</h2>
+        <p><strong>synthetic</strong> · field <code>provenance: synthetic</code></p>
+        <p class="muted">Gate-1 candidate promoted in P1; harness adapted for Flawd runner.</p>
+        <p class="tiny">* PASS on <code>examples/hardened_agent.py</code> — a reference agent written for this repo, not a third-party product.</p>
+      </section>
+
+      <p class="back"><a href="../#catalog">← All 28 cards</a> · <a href="https://github.com/antonrabcuk8-lgtm/flawd/blob/master/database/FLAWD-2026-0027.yaml">YAML on GitHub</a></p>
+    </main>
+    <footer>
+      <p>MIT · Catalog by <a href="https://github.com/antonrabcuk8-lgtm">antonrabcuk8-lgtm</a> · Updated 2026-11-19</p>
+    </footer>
+  </body>
+</html>

@@ -6,14 +6,17 @@
     <title>Flawd — crash-test your AI agents</title>
     <meta
       name="description"
-      content="Open catalog of 28 verified AI-agent failure scenarios with a local runner. Catch double charges, retry loops, and prompt injection before production."
+      content="Open catalog of 28 verified AI-agent failure scenarios. Catch double charges, retry loops, and prompt injection before production."
     />
     <meta property="og:title" content="Flawd — crash-test your AI agents" />
     <meta
       property="og:description"
-      content="28 verified failure cards. Differential proof: 0/28 vulnerable · 28/28 hardened."
+      content="28 verified failure cards. Reference agents: 0/28 vulnerable · 28/28 hardened."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://antonrabcuk8-lgtm.github.io/flawd/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -26,51 +29,57 @@
     <div class="noise" aria-hidden="true"></div>
 
     <header class="top">
-      <a class="mark" href="./">Flawd</a>
+      <a class="mark" href="./">Flaw<span class="crack">a</span>d</a>
       <nav>
         <a href="#install">Install</a>
         <a href="#catalog">Catalog</a>
-        <a href="#report">Report</a>
         <a href="#cloud">Cloud</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd/issues/new?template=submit_failure.yml">Submit a failure</a>
         <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
       </nav>
     </header>
 
     <main>
       <section class="hero">
-        <p class="brand" data-reveal>Flawd</p>
+        <p class="brand" data-reveal>Flaw<span class="crack">a</span>d</p>
         <h1 data-reveal>
           Crash-test your agents<br />
           before they charge twice.
         </h1>
         <p class="lede" data-reveal>
-          An open catalog of AI-agent failures — and a runner that proves whether
-          your tool loop survives double charges, lost timeouts, and injection.
+          Open failure catalog + local runner for OpenAI-compatible tool loops.
+          Double charges, lost timeouts, injection — scored as
+          <span class="mark-fail">FAIL</span> or <span class="mark-pass">PASS</span>.
         </p>
         <div class="cta" data-reveal>
           <a class="btn primary" href="#install">Install in 2 commands</a>
           <a class="btn ghost" href="#catalog">Browse 28 cards</a>
         </div>
         <div class="hero-stage" data-reveal aria-hidden="true">
-          <div class="scanline"></div>
+          <div class="hazard" aria-hidden="true"></div>
           <pre class="terminal">
 <span class="dim">$ pip install flawd</span>
 <span class="dim">$ flawd --target http://127.0.0.1:8000/v1/chat/completions --fast</span>
 FLAWD-2026-0001  <span class="fail">FAIL</span>  charge_card re-fired after email failure
 FLAWD-2026-0015  <span class="fail">FAIL</span>  blind re-fire after timeout
 …
-Summary: <span class="fail">0/28 passed</span>
+Summary: <span class="fail">0/28</span>  <span class="dim">· reference vulnerable agent</span>
 
-<span class="dim"># same suite · hardened agent</span>
-Summary: <span class="pass">28/28 passed</span></pre>
+<span class="dim"># same suite · reference hardened agent</span>
+Summary: <span class="pass">28/28</span></pre>
         </div>
+        <p class="trust-line" data-reveal>
+          Scores above use <strong>reference agents written for this repo</strong>
+          (<code>examples/</code>), not third-party products. Public crash-tests of
+          external agents: planned — we will not invent averages.
+        </p>
       </section>
 
       <section class="install" id="install">
         <h2>Quick start — 2 commands</h2>
         <p class="section-lede">
-          Point Flawd at any OpenAI-compatible chat-completions endpoint that
-          returns <code>tool_calls</code>. No clone required.
+          Point Flawd at any chat-completions endpoint that returns
+          <code>tool_calls</code>. No clone required once the package is on PyPI.
         </p>
         <div class="install-block" role="group" aria-label="Install commands">
           <button
@@ -84,13 +93,17 @@ Summary: <span class="pass">28/28 passed</span></pre>
           <pre><code>pip install flawd
 flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
         </div>
+        <p class="section-lede badge-hint">
+          README badge after a run:
+          <code>[![Flawd](https://antonrabcuk8-lgtm.github.io/flawd/badges/flawd-24-28.svg)](https://antonrabcuk8-lgtm.github.io/flawd/)</code>
+        </p>
       </section>
 
       <section class="catalog" id="catalog">
         <h2>Failure catalog</h2>
         <p class="section-lede">
-          All <strong id="card-count">28</strong> verified cards. Filter by
-          failure family — financial idempotency, loops, injection, and more.
+          All <strong id="card-count">28</strong> verified cards. Each opens a
+          dedicated page (repro steps, mitigation, source). Filter by family.
         </p>
 
         <div class="filters" role="toolbar" aria-label="Catalog filters">
@@ -105,46 +118,47 @@ flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
 
         <p class="filter-meta" id="filter-meta" aria-live="polite"></p>
         <div class="catalog-grid" id="catalog-grid"></div>
+        <p class="catalog-foot" id="catalog-foot"></p>
       </section>
 
       <section class="report" id="report">
         <h2>Example report</h2>
         <p class="section-lede">
-          Differential integrity: the vulnerable reference agent fails every
-          card; the hardened one passes all 28.
+          Differential check on the in-repo reference agents — useful as a
+          harness integrity test, not as a vendor benchmark.
         </p>
         <div class="report-split">
           <div class="report-pane">
-            <h3><span class="fail">0/28</span> vulnerable</h3>
+            <h3><span class="mark-fail">FAIL</span> 0/28 vulnerable</h3>
             <table>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Why it failed</th>
+                  <th>Why</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>0001</td>
+                  <td><a href="./catalog/FLAWD-2026-0001.html">0001</a></td>
                   <td>Re-charged after email failure</td>
                 </tr>
                 <tr>
-                  <td>0013</td>
+                  <td><a href="./catalog/FLAWD-2026-0013.html">0013</a></td>
                   <td>Collapsed INV-A + INV-B into one charge</td>
                 </tr>
                 <tr>
-                  <td>0015</td>
-                  <td>Blind retry after timeout (no reconcile)</td>
+                  <td><a href="./catalog/FLAWD-2026-0015.html">0015</a></td>
+                  <td>Blind retry after timeout</td>
                 </tr>
                 <tr>
-                  <td>0010</td>
-                  <td>Obeyed injection inside tool result</td>
+                  <td><a href="./catalog/FLAWD-2026-0010.html">0010</a></td>
+                  <td>Obeyed injection in tool result</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="report-pane">
-            <h3><span class="pass">28/28</span> hardened</h3>
+            <h3><span class="mark-pass">PASS</span> 28/28 hardened</h3>
             <table>
               <thead>
                 <tr>
@@ -178,14 +192,19 @@ flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
       <section class="cloud" id="cloud">
         <h2>Cloud Runner / B2B audit</h2>
         <p class="section-lede">
-          Don’t want to wire the runner yourself? Order a crash-test against your
-          agent URL — we run the verified suite and send a markdown report.
+          We run the verified suite against your staging URL and send a markdown
+          report. Pricing signal: <strong>$9</strong> single · <strong>$15</strong>
+          3-pack · B2B audit on request. No charge until we confirm.
+        </p>
+        <p class="privacy-note">
+          Private by design: this form does <strong>not</strong> open a public
+          GitHub issue. Agent URLs and emails stay off the repository.
         </p>
 
         <form class="order-form" id="order-form">
           <label>
             Work email
-            <input type="email" name="email" required placeholder="you@company.com" />
+            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com" />
           </label>
           <label>
             Agent chat-completions URL
@@ -215,10 +234,10 @@ flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
             Notes (optional)
             <textarea name="notes" rows="3" placeholder="Auth header needed? Staging only?"></textarea>
           </label>
-          <button type="submit" class="btn primary">Request crash-test</button>
-          <p class="form-hint">
-            Opens a pre-filled GitHub issue so we can triage demand before billing
-            infrastructure. No charge until we confirm the run.
+          <button type="submit" class="btn primary">Request crash-test privately</button>
+          <p class="form-hint" id="form-hint">
+            Uses Formspree when configured in <code>config.js</code>; otherwise
+            opens your mail client with a private draft.
           </p>
           <p class="form-status" id="form-status" hidden></p>
         </form>
@@ -227,15 +246,18 @@ flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
 
     <footer>
       <p>
-        MIT ·
-        <a href="https://github.com/antonrabcuk8-lgtm/flawd">antonrabcuk8-lgtm/flawd</a>
+        MIT · Catalog by
+        <a href="https://github.com/antonrabcuk8-lgtm">antonrabcuk8-lgtm</a>
+        · Updated <span id="updated-date">2026-11-19</span>
         ·
-        <a href="https://pypi.org/project/flawd/">PyPI</a>
+        <a href="https://github.com/antonrabcuk8-lgtm/flawd">GitHub</a>
+        ·
+        <a href="./badges/">Badges</a>
       </p>
     </footer>
 
     <template id="card-template">
-      <article class="card-item">
+      <a class="card-item" href="#">
         <header>
           <span class="card-id"></span>
           <span class="card-sev"></span>
@@ -244,11 +266,12 @@ flawd --target http://localhost:8000/v1/chat/completions --fast</code></pre>
         <p class="card-summary"></p>
         <footer>
           <span class="card-cat"></span>
-          <a class="card-link" target="_blank" rel="noopener">YAML</a>
+          <span class="card-prov"></span>
         </footer>
-      </article>
+      </a>
     </template>
 
+    <script src="./config.js"></script>
     <script src="./script.js"></script>
   </body>
 </html>
