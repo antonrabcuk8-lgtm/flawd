@@ -6,52 +6,35 @@ import "./FaultyTerminal.css";
 const MOBILE_MQ = "(max-width: 720px)";
 const REDUCE_MQ = "(prefers-reduced-motion: reduce)";
 
-function shouldEnableFx() {
-  if (typeof window === "undefined") return false;
-  if (window.matchMedia(REDUCE_MQ).matches) return false;
-  if (window.matchMedia(MOBILE_MQ).matches) return false;
-  return true;
+function getFxMode() {
+  if (typeof window === "undefined") return "static";
+  if (window.matchMedia(REDUCE_MQ).matches) return "reduced";
+  if (window.matchMedia(MOBILE_MQ).matches) return "mobile";
+  return "live";
 }
 
-function HeroTerminal({ heroEl, userPaused }) {
+function HeroTerminal({ heroEl, userPaused, mode }) {
   const [offscreen, setOffscreen] = useState(false);
-  const [enabled, setEnabled] = useState(() => shouldEnableFx());
 
   useEffect(() => {
-    const reduceMq = window.matchMedia(REDUCE_MQ);
-    const mobileMq = window.matchMedia(MOBILE_MQ);
-    const sync = () => setEnabled(shouldEnableFx());
-    reduceMq.addEventListener?.("change", sync);
-    mobileMq.addEventListener?.("change", sync);
-    reduceMq.addListener?.(sync);
-    mobileMq.addListener?.(sync);
-    return () => {
-      reduceMq.removeEventListener?.("change", sync);
-      mobileMq.removeEventListener?.("change", sync);
-      reduceMq.removeListener?.(sync);
-      mobileMq.removeListener?.(sync);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!enabled || !heroEl) {
+    if (mode !== "live" || !heroEl) {
       setOffscreen(true);
       return undefined;
     }
-    // Pause WebGL when the hero leaves the viewport
-    // (modern-web-guidance: efficient-background-processing / IntersectionObserver fallback).
     const io = new IntersectionObserver(
       (entries) => {
-        const on = entries.some((e) => e.isIntersecting && e.intersectionRatio > 0.05);
+        const on = entries.some((e) => e.isIntersecting && e.intersectionRatio > 0.02);
         setOffscreen(!on);
       },
-      { threshold: [0, 0.05, 0.2] }
+      { threshold: [0, 0.02, 0.15] }
     );
     io.observe(heroEl);
     return () => io.disconnect();
-  }, [enabled, heroEl]);
+  }, [mode, heroEl]);
 
-  if (!enabled) return null;
+  if (mode !== "live") {
+    return <div className="hero-fx-static" aria-hidden="true" />;
+  }
 
   return (
     <FaultyTerminal
@@ -72,13 +55,13 @@ function HeroTerminal({ heroEl, userPaused }) {
       mouseReact={false}
       mouseStrength={0.3}
       pageLoadAnimation={false}
-      brightness={0.55}
+      brightness={0.65}
       glyphs="characters"
-      glow={0.7}
+      glow={0.85}
       persistence={0.35}
       scramble={0.2}
       mouseGlow={0}
-      vignette={0.55}
+      vignette={0.45}
       clickEffect="none"
       dpr={Math.min(window.devicePixelRatio || 1, 1.5)}
       style={{ width: "100%", height: "100%" }}
@@ -87,12 +70,40 @@ function HeroTerminal({ heroEl, userPaused }) {
 }
 
 function App({ heroEl }) {
+  const [mode, setMode] = useState(() => getFxMode());
   const [userPaused, setUserPaused] = useState(false);
 
   useEffect(() => {
+    const sync = () => setMode(getFxMode());
+    const reduceMq = window.matchMedia(REDUCE_MQ);
+    const mobileMq = window.matchMedia(MOBILE_MQ);
+    reduceMq.addEventListener?.("change", sync);
+    mobileMq.addEventListener?.("change", sync);
+    reduceMq.addListener?.(sync);
+    mobileMq.addListener?.(sync);
+    window.addEventListener("resize", sync);
+    // Re-check after layout (covers late viewport / zoom).
+    requestAnimationFrame(sync);
+    return () => {
+      reduceMq.removeEventListener?.("change", sync);
+      mobileMq.removeEventListener?.("change", sync);
+      reduceMq.removeListener?.(sync);
+      mobileMq.removeListener?.(sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    const rootEl = document.getElementById("hero-fx-root");
+    if (rootEl) rootEl.setAttribute("data-fx", mode === "live" ? "live" : "static");
+  }, [mode]);
+
+  useEffect(() => {
     const btn = document.getElementById("hero-fx-toggle");
-    if (!btn || !shouldEnableFx()) return undefined;
-    btn.hidden = false;
+    if (!btn) return undefined;
+    const show = mode === "live";
+    btn.hidden = !show;
+    if (!show) return undefined;
     const onClick = () => {
       setUserPaused((p) => {
         const next = !p;
@@ -102,23 +113,25 @@ function App({ heroEl }) {
     };
     btn.addEventListener("click", onClick);
     return () => btn.removeEventListener("click", onClick);
-  }, []);
+  }, [mode]);
 
-  return <HeroTerminal heroEl={heroEl} userPaused={userPaused} />;
+  return <HeroTerminal heroEl={heroEl} userPaused={userPaused} mode={mode} />;
 }
 
 function mount() {
   const rootEl = document.getElementById("hero-fx-root");
   const heroEl = document.querySelector(".hero");
-  if (!rootEl) return;
-
-  if (!shouldEnableFx()) {
-    rootEl.setAttribute("data-fx", "static");
+  if (!rootEl) {
+    console.warn("[flawd-hero-fx] #hero-fx-root missing");
     return;
   }
-
-  rootEl.setAttribute("data-fx", "live");
-  createRoot(rootEl).render(<App heroEl={heroEl} />);
+  rootEl.setAttribute("data-fx", "booting");
+  try {
+    createRoot(rootEl).render(<App heroEl={heroEl} />);
+  } catch (err) {
+    console.error("[flawd-hero-fx] mount failed", err);
+    rootEl.setAttribute("data-fx", "error");
+  }
 }
 
 if (document.readyState === "loading") {

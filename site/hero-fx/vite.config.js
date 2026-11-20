@@ -7,20 +7,18 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, ".."),
     emptyOutDir: false,
-    lib: {
-      entry: path.resolve(import.meta.dirname, "src/main.jsx"),
-      name: "FlawdHeroFx",
-      formats: ["iife"],
-      fileName: () => "hero-fx.bundle.js",
-    },
-    rollupOptions: {
-      output: {
-        inlineDynamicImports: true,
-        assetFileNames: "hero-fx.[ext]",
-      },
-    },
     cssCodeSplit: false,
     sourcemap: false,
     minify: true,
+    rollupOptions: {
+      input: path.resolve(import.meta.dirname, "src/main.jsx"),
+      output: {
+        format: "iife",
+        name: "FlawdHeroFx",
+        entryFileNames: "hero-fx.bundle.js",
+        assetFileNames: "hero-fx.[ext]",
+        inlineDynamicImports: true,
+      },
+    },
   },
 });

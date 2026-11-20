@@ -169,14 +169,21 @@ nav {
   min-height: 100%;
 }
 
-#hero-fx-root[data-fx="live"] {
-  opacity: 1;
-}
-
 .hero-faulty-terminal,
-.faulty-terminal-container {
+.faulty-terminal-container,
+.hero-fx-static {
   width: 100% !important;
   height: 100% !important;
+}
+
+.hero-fx-static {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(198, 255, 61, 0.045) 0 1px,
+      transparent 1px 3px
+    ),
+    radial-gradient(ellipse 70% 55% at 65% 40%, rgba(198, 255, 61, 0.14), transparent 60%);
 }
 
 .hero-fx-overlay {
