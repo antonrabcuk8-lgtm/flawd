@@ -72,7 +72,7 @@ function HeroTerminal({ heroEl, userPaused }) {
       mouseReact={false}
       mouseStrength={0.3}
       pageLoadAnimation={false}
-      brightness={0.45}
+      brightness={0.55}
       glyphs="characters"
       glow={0.7}
       persistence={0.35}
