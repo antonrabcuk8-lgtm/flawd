@@ -33,6 +33,11 @@ build/
 .coverage
 htmlcov/
 
+# Hero FX (isolated React Bits bundle)
+site/hero-fx/node_modules/
+site/hero-fx/dist/
+.agents/
+
 # OS / editor
 .DS_Store
 Thumbs.db

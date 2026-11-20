@@ -42,6 +42,10 @@
       </nav>
 
       <header class="hero">
+        <div class="hero-fx" aria-hidden="true">
+          <div id="hero-fx-root" data-fx="static"></div>
+          <div class="hero-fx-overlay"></div>
+        </div>
         <div class="hero-copy">
           <div class="eyebrow">Agent reliability toolkit / 2026</div>
           <h1>Flawd</h1>
@@ -65,6 +69,9 @@
             (<code>examples/</code>), not third-party bots. External-agent averages:
             planned — we will not invent them.
           </p>
+          <button type="button" class="hero-fx-toggle" id="hero-fx-toggle" hidden>
+            Pause background
+          </button>
         </div>
         <div class="terminal" aria-hidden="true">
           <div class="terminal-top">
@@ -296,5 +303,8 @@ Summary: <span class="ok">28/28 passed</span></pre>
 
     <script src="./config.js"></script>
     <script src="./script.js"></script>
+    <!-- Isolated React Bits FaultyTerminal bundle (hero only; rest of site stays plain HTML). -->
+    <link rel="stylesheet" href="./hero-fx.css" />
+    <script src="./hero-fx.bundle.js" defer></script>
   </body>
 </html>

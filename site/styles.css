@@ -145,6 +145,85 @@ nav {
   grid-template-columns: 1.05fr 0.95fr;
   gap: 48px;
   align-items: center;
+  isolation: isolate;
+}
+
+.hero-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 0;
+  /* Static CRT-ish fallback when FX is disabled (mobile / reduced-motion). */
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(198, 255, 61, 0.08), transparent 55%),
+    linear-gradient(165deg, #0b100c 0%, #090d0b 55%, #0a0f0c 100%);
+}
+
+#hero-fx-root {
+  position: absolute;
+  inset: 0;
+}
+
+#hero-fx-root[data-fx="live"] {
+  opacity: 1;
+}
+
+.hero-faulty-terminal,
+.faulty-terminal-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.hero-fx-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* Keep headline contrast >= 4.5:1 over the lime terminal tint. */
+  background:
+    linear-gradient(90deg, rgba(9, 13, 11, 0.92) 0%, rgba(9, 13, 11, 0.78) 42%, rgba(9, 13, 11, 0.55) 70%, rgba(9, 13, 11, 0.42) 100%),
+    linear-gradient(180deg, rgba(9, 13, 11, 0.55) 0%, transparent 28%, rgba(9, 13, 11, 0.72) 100%);
+}
+
+.hero-copy,
+.hero .terminal {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-fx-toggle {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: 10px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.hero-fx-toggle:hover {
+  color: var(--lime);
+  border-color: var(--lime);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fx-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-fx-toggle {
+    display: none;
+  }
+
+  .hero-fx-overlay {
+    background:
+      linear-gradient(180deg, rgba(9, 13, 11, 0.5) 0%, rgba(9, 13, 11, 0.25) 40%, rgba(9, 13, 11, 0.65) 100%);
+  }
 }
 
 .eyebrow {
